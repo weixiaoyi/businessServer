@@ -1,0 +1,45 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start_dev": "pm2 start ./ecosystem.config.js",
+    "start_pro": "pm2 start ./ecosystem.config.js --env production",
+    "delete": "pm2 delete all",
+    "logs": "pm2 flush && pm2 logs"
+  },
+  "dependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "bip39": "^3.0.2",
+    "connect-mongo": "^2.0.3",
+    "cookie-parser": "~1.4.4",
+    "crypto-js": "^3.1.9-1",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "express-session": "^1.16.1",
+    "husky": "^3.0.4",
+    "lint-staged": "^9.2.3",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "mongoose": "^5.5.11",
+    "morgan": "~1.9.1",
+    "node-fetch": "^2.6.0",
+    "prettier": "^1.18.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
