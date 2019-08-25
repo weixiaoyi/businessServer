@@ -20,7 +20,7 @@ class UserController extends Router {
       [this.authority.checkLogin],
       this.getUserInfo
     );
-    this.router.post("/oauth/access_token", this.oauthAccess_token);
+    // this.router.post("/oauth/access_token", this.oauthAccess_token);
     this.router.get("/loginOut", this.loginOut);
     this.router.post(
       "/updateUserInfo",
@@ -55,12 +55,7 @@ class UserController extends Router {
 
   register = async (req, res) => {
     const { accountId, password, ...rest } = req.body;
-    const { host, userAgent } = rest;
-    if (
-      !this.checkAccountIdAndPasswordFormat(accountId, password) ||
-      !host ||
-      !userAgent
-    ) {
+    if (!this.checkAccountIdAndPasswordFormat(accountId, password)) {
       return this.fail(res, {
         msg: "Bad Request",
         status: 400
@@ -162,7 +157,7 @@ class UserController extends Router {
 
   loginOrRegisterMode = async (req, res, user, mode) => {
     let resultUser = null;
-    const { accountId, password, ...rest } = user;
+    const { accountId, password } = user;
     const findUser = await this.checkUserAccountIdIsExist(accountId);
     if (mode === "login") {
       if (!findUser) {
@@ -177,20 +172,32 @@ class UserController extends Router {
       }
       resultUser = findUser;
     } else {
+      const { host, userAgent } = user;
+      if (!host || !userAgent) {
+        return this.fail(res, {
+          msg: "Bad Request",
+          status: 400
+        });
+      }
       const createUser = async (payload = {}) => {
         const { name = accountId } = payload;
         const newUser = new User({
-          accountId,
+          accountId, // accountId必须存在，password在第三方登陆或小程序登陆不需要
           name,
-          password,
-          host: rest.host,
-          userAgent: rest.userAgent,
+          host,
+          userAgent,
           ...payload,
+          decrypt: req.decrypt,
           createTime: Date.now()
         });
         return await newUser.save().catch(this.handleSqlError);
       };
       if (mode === "register") {
+        if (findUser) {
+          return this.fail(res, {
+            msg: "账户名已经存在"
+          });
+        }
         const isDecryptExist = await this.checkDecryptIsExist(req.decrypt);
         if (isDecryptExist) {
           return this.fail(res, {
@@ -198,18 +205,13 @@ class UserController extends Router {
             status: 400
           });
         }
-        if (findUser) {
-          return this.fail(res, {
-            msg: "账户名已经存在"
-          });
-        }
         resultUser = await createUser({
-          decrypt: req.decrypt
+          password //正常注册，密码必须有
         });
       } else if (mode === "ifNotRegisterThenLogin") {
-        const { name, platform } = user;
+        // 第三方快捷登陆，微信小程序登陆
         if (!findUser) {
-          resultUser = await createUser({ name, platform });
+          resultUser = await createUser(); // 不需要密码，不需要
         } else {
           resultUser = findUser;
         }
