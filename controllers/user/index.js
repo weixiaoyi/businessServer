@@ -13,20 +13,21 @@ class UserController extends Router {
 
   init = () => {
     this.authority = new Authority();
-    this.router.post("/register", this.register);
     this.router.post("/login", this.login);
+    this.router.post("/register", this.register);
+    this.router.post("/loginThird", this.loginThird);
     this.router.get(
       "/getUserInfo",
       [this.authority.checkLogin],
       this.getUserInfo
     );
-    // this.router.post("/oauth/access_token", this.oauthAccess_token);
     this.router.get("/loginOut", this.loginOut);
     this.router.post(
       "/updateUserInfo",
       [this.authority.checkLogin],
       this.updateUserInfo
     );
+    // this.router.post("/oauth/access_token", this.oauthAccess_token);
   };
 
   sendUser = (req, res, user) => {
@@ -63,6 +64,15 @@ class UserController extends Router {
     }
     const user = { accountId, password, ...rest };
     return this.loginOrRegisterMode(req, res, user, "register");
+  };
+
+  loginThird = async (req, res) => {
+    const { platform, ...rest } = req.body;
+    if (platform === "WechatApplet") {
+      // 微信小程序
+      const { code } = rest;
+      console.log(code);
+    }
   };
 
   getUserInfo = async (req, res) => {
@@ -110,49 +120,6 @@ class UserController extends Router {
     }
     req.session.user = updatedUser;
     return this.sendUser(req, res, updatedUser);
-  };
-
-  oauthAccess_token = async (req, res) => {
-    const { platform, code } = req.body;
-    if (!(platform && code)) {
-      return this.fail(res, {
-        status: 400,
-        msg: "Bad Request"
-      });
-    }
-    let user = {};
-    if (platform === "github") {
-      const text = await fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          client_id: OAUTH.github.client_id,
-          client_secret: OAUTH.github.client_secret
-        })
-      })
-        .then(res => res.text())
-        .catch(() => null);
-
-      const tokenResult = splitQueryString(text);
-      if (tokenResult.error)
-        return this.fail(res, { msg: tokenResult.error_description });
-      if (!tokenResult.access_token)
-        return this.fail(res, { msg: "获取access_token失败" });
-      const userInfo = await fetch(
-        `https://api.github.com/user?access_token=${tokenResult.access_token}`
-      )
-        .then(res => res.json())
-        .catch(() => null);
-      if (!_.get(userInfo, "id"))
-        return this.fail(res, { msg: "获取用户信息失败" });
-      user = {
-        accountId: userInfo.id,
-        name: `${userInfo.login}_${userInfo.id}`,
-        platform: "github"
-      };
-    }
-    return this.loginOrRegisterMode(req, res, user, "ifNotRegisterThenLogin");
   };
 
   loginOrRegisterMode = async (req, res, user, mode) => {
@@ -243,6 +210,49 @@ class UserController extends Router {
   loginOut = async (req, res) => {
     req.session.user = null;
     return this.success(res);
+  };
+
+  oauthAccess_token = async (req, res) => {
+    const { platform, code } = req.body;
+    if (!(platform && code)) {
+      return this.fail(res, {
+        status: 400,
+        msg: "Bad Request"
+      });
+    }
+    let user = {};
+    if (platform === "github") {
+      const text = await fetch("https://github.com/login/oauth/access_token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          client_id: OAUTH.github.client_id,
+          client_secret: OAUTH.github.client_secret
+        })
+      })
+        .then(res => res.text())
+        .catch(() => null);
+
+      const tokenResult = splitQueryString(text);
+      if (tokenResult.error)
+        return this.fail(res, { msg: tokenResult.error_description });
+      if (!tokenResult.access_token)
+        return this.fail(res, { msg: "获取access_token失败" });
+      const userInfo = await fetch(
+        `https://api.github.com/user?access_token=${tokenResult.access_token}`
+      )
+        .then(res => res.json())
+        .catch(() => null);
+      if (!_.get(userInfo, "id"))
+        return this.fail(res, { msg: "获取用户信息失败" });
+      user = {
+        accountId: userInfo.id,
+        name: `${userInfo.login}_${userInfo.id}`,
+        platform: "github"
+      };
+    }
+    return this.loginOrRegisterMode(req, res, user, "ifNotRegisterThenLogin");
   };
 }
 
