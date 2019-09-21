@@ -8,6 +8,7 @@ const answerSchema = new mongoose.Schema({
   content: String,
   prevUpVoteNum: String,
   currentUpVoteNum: String,
+  online: String,
   createTime: String,
   updateTime: String
 });
