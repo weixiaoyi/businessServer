@@ -9,13 +9,41 @@ class AnswerController extends Router {
 
   init = () => {
     this.authority = new Authority();
-    this.router.get("/getAnswers", this.getAnswers);
-    this.router.post("/uploadAnswer", this.uploadAnswer);
-    this.router.post("/onlineAnswer", this.onlineAnswer);
-    this.router.post("/offlineAnswer", this.offlineAnswer);
-    this.router.post("/deleteLineAnswer", this.deleteLineAnswer);
-    this.router.post("/updateLineAnswer", this.updateLineAnswer);
-    this.router.post("/checkLineAnswer", this.checkLineAnswer);
+    this.router.get(
+      "/getAnswers",
+      [this.authority.checkLogin],
+      this.getAnswers
+    );
+    this.router.post(
+      "/uploadAnswer",
+      [this.authority.checkLogin],
+      this.uploadAnswer
+    );
+    this.router.post(
+      "/onlineAnswer",
+      [this.authority.checkLogin],
+      this.onlineAnswer
+    );
+    this.router.post(
+      "/offlineAnswer",
+      [this.authority.checkLogin],
+      this.offlineAnswer
+    );
+    this.router.post(
+      "/deleteLineAnswer",
+      [this.authority.checkLogin],
+      this.deleteLineAnswer
+    );
+    this.router.post(
+      "/updateLineAnswer",
+      [this.authority.checkLogin],
+      this.updateLineAnswer
+    );
+    this.router.post(
+      "/checkLineAnswer",
+      [this.authority.checkLogin],
+      this.checkLineAnswer
+    );
   };
 
   getAnswers = async (req, res) => {
@@ -92,7 +120,7 @@ class AnswerController extends Router {
     const answer = req.body;
     if (!answer.dbName || !answer.content)
       return this.fail(res, {
-        status: 401
+        status: 400
       });
     const result = await Answer.findOneAndUpdate(
       { answerId: answer.answerId },

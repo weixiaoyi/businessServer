@@ -1,7 +1,7 @@
 import Response from "./Response";
 class Authority extends Response {
   checkLogin = (req, res, next) => {
-    if (req.session && req.session.user) {
+    if ((req.session && req.session.user) || req.headers.signature) {
       next();
     } else {
       return this.fail(res, {

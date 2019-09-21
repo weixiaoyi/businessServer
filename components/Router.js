@@ -10,22 +10,16 @@ class Router extends Response {
   }
 
   init = () => {
-    this.router.get(
-      "/",
-      (...payload) => _.isFunction(this.get) && this.get(...payload)
-    );
-    this.router.post(
-      "/",
-      (...payload) => _.isFunction(this.post) && this.post(...payload)
-    );
-  };
-
-  get = () => {
-    console.log("get");
-  };
-
-  post = () => {
-    console.log("post");
+    this.router.get &&
+      this.router.get(
+        "/",
+        (...payload) => _.isFunction(this.get) && this.get(...payload)
+      );
+    this.router.post &&
+      this.router.post(
+        "/",
+        (...payload) => _.isFunction(this.post) && this.post(...payload)
+      );
   };
 }
 
