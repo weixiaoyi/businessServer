@@ -14,6 +14,8 @@ class AnswerController extends Router {
     this.router.post("/onlineAnswer", this.onlineAnswer);
     this.router.post("/offlineAnswer", this.offlineAnswer);
     this.router.post("/deleteLineAnswer", this.deleteLineAnswer);
+    this.router.post("/updateLineAnswer", this.updateLineAnswer);
+    this.router.post("/checkLineAnswer", this.checkLineAnswer);
   };
 
   getAnswers = async (req, res) => {
@@ -31,7 +33,9 @@ class AnswerController extends Router {
         content: item.content,
         createTime: item.createTime,
         questionId: item.questionId,
+        prevUpVoteNum: item.prevUpVoteNum,
         title: item.title,
+        dbName: item.dbName,
         online: item.online
       })),
       pagination: {
@@ -76,7 +80,7 @@ class AnswerController extends Router {
       {
         $set: { online: "on" }
       },
-      { new: true, upsert: true }
+      { new: true }
     ).catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
@@ -86,6 +90,10 @@ class AnswerController extends Router {
 
   uploadAnswer = async (req, res) => {
     const answer = req.body;
+    if (!answer.dbName || !answer.content)
+      return this.fail(res, {
+        status: 401
+      });
     const result = await Answer.findOneAndUpdate(
       { answerId: answer.answerId },
       {
@@ -94,6 +102,31 @@ class AnswerController extends Router {
       },
       { new: true, upsert: true }
     ).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  updateLineAnswer = async (req, res) => {
+    const { answerId, ...rest } = req.body;
+    const result = await Answer.findOneAndUpdate(
+      { answerId },
+      {
+        content: rest.content,
+        updateTime: Date.now()
+      },
+      { new: true }
+    ).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  checkLineAnswer = async (req, res) => {
+    const { answerId } = req.body;
+    const result = await Answer.find({ answerId }).catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
       data: result

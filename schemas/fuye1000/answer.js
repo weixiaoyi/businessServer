@@ -10,6 +10,8 @@ const answerSchema = new mongoose.Schema({
   currentUpVoteNum: String,
   online: String,
   createTime: String,
-  updateTime: String
+  updateTime: String,
+  dbName: String,
+  other: String
 });
 export default answerSchema;
