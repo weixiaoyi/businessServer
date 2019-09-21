@@ -29,6 +29,8 @@ yarn add @babel/plugin-proposal-decorators
 
 yarn add @babel/plugin-proposal-class-properties
 
+yarn add babel-plugin-add-module-exports
+
 // app.js 为主入口文件
 require('@babel/register')
 

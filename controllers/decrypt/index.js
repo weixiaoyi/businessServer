@@ -14,7 +14,9 @@ class DecryptController extends Router {
     this.router.all(
       "*",
       (req, res, next) => {
+        console.log(req.path, "--p");
         if (req.path === "/pay/notify") next("route");
+        if ("/fuye1000/api".test(req.path)) next("route");
         else next();
       },
       (req, res, next) => {
