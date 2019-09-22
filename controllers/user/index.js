@@ -113,10 +113,7 @@ class UserController extends Router {
       { new: true }
     ).catch(this.handleSqlError);
     if (!updatedUser) {
-      return this.fail({
-        msg: "未知错误",
-        status: 500
-      });
+      return this.fail(res);
     }
     req.session.user = updatedUser;
     return this.sendUser(req, res, updatedUser);

@@ -15,7 +15,7 @@ class Response {
     });
   };
 
-  fail = (res, { status, data, code = -1, msg = "fail" } = {}) => {
+  fail = (res, { status = 500, data, code = -1, msg = "fail" } = {}) => {
     if (!res) console.error("res不存在");
     status ? res.status(status) : null;
     res.json({
