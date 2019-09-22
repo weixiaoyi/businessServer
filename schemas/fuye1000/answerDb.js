@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 const answerDbSchema = new mongoose.Schema({
-  dbName: String,
+  name: String,
+  desc: String,
   title: String,
-  description: String,
+  intro: String,
   imageUrl: String,
   online: String,
   createTime: String,
-  other: String
+  other: String,
+  member: {
+    limit: Number, // 非会员能够看到的页码,
+    price: Number // 会员价格
+  }
 });
 export default answerDbSchema;
