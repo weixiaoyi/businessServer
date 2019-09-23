@@ -48,6 +48,10 @@ class AnswerController extends Router {
 
   getAnswers = async (req, res) => {
     const { page, pageSize, dbName } = req.query;
+    if (!page || !pageSize || !dbName)
+      return this.fail(res, {
+        status: 400
+      });
     const counts = await Answer.countDocuments().catch(this.handleSqlError);
     const data = await Answer.find({ dbName })
       .limit(Number(pageSize))

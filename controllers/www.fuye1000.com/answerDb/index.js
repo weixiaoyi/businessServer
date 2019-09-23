@@ -37,9 +37,10 @@ class AnswerDbController extends Router {
   };
 
   getAnswerDbs = async (req, res) => {
-    const { page, pageSize } = req.query;
+    const { page, pageSize, online } = req.query;
     const counts = await AnswerDb.countDocuments().catch(this.handleSqlError);
-    const data = await AnswerDb.find()
+    if (!page || !pageSize) return this.fail(res, { status: 400 });
+    const data = await AnswerDb.find(online ? { online } : {})
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
       .catch(this.handleSqlError);
