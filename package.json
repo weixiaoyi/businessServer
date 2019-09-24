@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start_dev": "pm2 start ./ecosystem.config.js",
+    "start_pre": "pm2 start ./ecosystem.config.js --env predevelopment",
     "start_pro": "pm2 start ./ecosystem.config.js --env production",
     "delete": "pm2 delete all",
     "logs": "pm2 flush && pm2 logs"
@@ -29,6 +30,7 @@
     "mongoose": "^5.5.11",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
+    "pm2": "^3.5.1",
     "prettier": "^1.18.2"
   },
   "husky": {
