@@ -6,7 +6,7 @@ const answerDbSchema = new mongoose.Schema({
   intro: String,
   imageUrl: String,
   online: String,
-  createTime: String,
+  createTime: Date,
   other: String,
   member: {
     limit: Number, // 非会员能够看到的页码,

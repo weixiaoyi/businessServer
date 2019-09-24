@@ -7,7 +7,7 @@ const answerSchema = new mongoose.Schema({
   authorId: String,
   content: String,
   prevUpVoteNum: String,
-  currentUpVoteNum: String,
+  currentUpVoteNum: { type: Number, default: 1 },
   online: String,
   createTime: Date,
   updateTime: Date,

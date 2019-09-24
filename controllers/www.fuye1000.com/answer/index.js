@@ -39,6 +39,7 @@ class AnswerController extends Router {
       [this.authority.checkLogin],
       this.updateLineAnswer
     );
+    this.router.post("/voteAnswer", this.voteAnswer);
     this.router.post(
       "/checkLineAnswer",
       [this.authority.checkLogin],
@@ -65,7 +66,7 @@ class AnswerController extends Router {
         content: item.content,
         createTime: item.createTime,
         questionId: item.questionId,
-        prevUpVoteNum: item.prevUpVoteNum,
+        currentUpVoteNum: item.currentUpVoteNum,
         title: item.title,
         dbName: item.dbName,
         online: item.online
@@ -147,6 +148,21 @@ class AnswerController extends Router {
       {
         content: rest.content,
         updateTime: Date.now()
+      },
+      { new: true }
+    ).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  voteAnswer = async (req, res) => {
+    const { answerId } = req.body;
+    const result = await Answer.findOneAndUpdate(
+      { answerId },
+      {
+        $inc: { currentUpVoteNum: 1 }
       },
       { new: true }
     ).catch(this.handleSqlError);
