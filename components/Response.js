@@ -7,9 +7,9 @@ class Response {
       msg,
       ...(pagination
         ? {
-            current: pagination.page,
-            pageSize: pagination.pageSize,
-            total: pagination.total
+            current: Number(pagination.page),
+            pageSize: Number(pagination.pageSize),
+            total: Number(pagination.total)
           }
         : {})
     });

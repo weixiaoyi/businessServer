@@ -38,8 +38,9 @@ class AnswerDbController extends Router {
 
   getAnswerDbs = async (req, res) => {
     const { page, pageSize, online } = req.query;
-    const counts = await AnswerDb.countDocuments().catch(this.handleSqlError);
     if (!page || !pageSize) return this.fail(res, { status: 400 });
+    const total = await AnswerDb.countDocuments().catch(this.handleSqlError);
+    if (total === null) return this.fail(res);
     const data = await AnswerDb.find(online ? { online } : {})
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
@@ -48,23 +49,26 @@ class AnswerDbController extends Router {
     return this.success(res, {
       data,
       pagination: {
-        page: Number(page),
-        pageSize: Number(pageSize),
-        total: counts
+        page,
+        pageSize,
+        total
       }
     });
   };
 
   onlineAnswerDb = async (req, res) => {
-    const db = req.body;
-    if (!db || !db.name || !db.title || !db.intro || !db.member)
+    const { name, title, intro, member } = req.body;
+    if (!name || !title || !intro || !member)
       return this.fail(res, {
         status: 400
       });
     const result = await AnswerDb.findOneAndUpdate(
-      { name: db.name },
+      { name },
       {
-        ...db,
+        name,
+        title,
+        intro,
+        member,
         createTime: Date.now(),
         online: "on"
       },
@@ -112,15 +116,18 @@ class AnswerDbController extends Router {
   };
 
   updateLineDb = async (req, res) => {
-    const db = req.body;
-    if (!db || !db.name || !db.title || !db.intro || !db.member)
+    const { name, title, intro, member } = req.body;
+    if (!name || !title || !intro || !member)
       return this.fail(res, {
         status: 400
       });
     const result = await AnswerDb.findOneAndUpdate(
-      { name: db.name },
+      { name },
       {
-        ...db
+        name,
+        title,
+        intro,
+        member
       },
       { new: true }
     ).catch(this.handleSqlError);

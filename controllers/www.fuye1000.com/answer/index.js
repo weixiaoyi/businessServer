@@ -48,13 +48,17 @@ class AnswerController extends Router {
   };
 
   getAnswers = async (req, res) => {
-    const { page, pageSize, dbName } = req.query;
+    const { page, pageSize, dbName, online } = req.query;
     if (!page || !pageSize || !dbName)
       return this.fail(res, {
         status: 400
       });
-    const counts = await Answer.countDocuments().catch(this.handleSqlError);
-    const data = await Answer.find({ dbName })
+    const limits = { dbName, ...(online ? { online } : {}) };
+    const total = await Answer.find(limits)
+      .countDocuments()
+      .catch(this.handleSqlError);
+    if (total === null) return this.fail(res);
+    const data = await Answer.find(limits)
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
       .catch(this.handleSqlError);
@@ -72,15 +76,16 @@ class AnswerController extends Router {
         online: item.online
       })),
       pagination: {
-        page: Number(page),
-        pageSize: Number(pageSize),
-        total: counts
+        page,
+        pageSize,
+        total
       }
     });
   };
 
   deleteLineAnswer = async (req, res) => {
     const { answerId } = req.body;
+    if (!answerId) return this.fail(res);
     const result = await Answer.findOneAndRemove(
       { answerId },
       { new: true }
@@ -93,10 +98,11 @@ class AnswerController extends Router {
 
   offlineAnswer = async (req, res) => {
     const { answerId } = req.body;
+    if (!answerId) return this.fail(res);
     const result = await Answer.findOneAndUpdate(
       { answerId },
       {
-        $set: { online: "off" }
+        online: "off"
       },
       { new: true }
     ).catch(this.handleSqlError);
@@ -108,10 +114,11 @@ class AnswerController extends Router {
 
   onlineAnswer = async (req, res) => {
     const { answerId } = req.body;
+    if (!answerId) return this.fail(res);
     const result = await Answer.findOneAndUpdate(
       { answerId },
       {
-        $set: { online: "on" }
+        online: "on"
       },
       { new: true }
     ).catch(this.handleSqlError);
@@ -122,15 +129,29 @@ class AnswerController extends Router {
   };
 
   uploadAnswer = async (req, res) => {
-    const answer = req.body;
-    if (!answer.dbName || !answer.content)
+    const {
+      answerId,
+      authorName,
+      content,
+      dbName,
+      prevUpVoteNum,
+      questionId,
+      title
+    } = req.body;
+    if (!answerId || !authorName || !content || !dbName)
       return this.fail(res, {
         status: 400
       });
     const result = await Answer.findOneAndUpdate(
-      { answerId: answer.answerId },
+      { answerId },
       {
-        ...answer,
+        answerId,
+        authorName,
+        content,
+        dbName,
+        prevUpVoteNum,
+        questionId,
+        title,
         createTime: Date.now()
       },
       { new: true, upsert: true }
@@ -142,11 +163,15 @@ class AnswerController extends Router {
   };
 
   updateLineAnswer = async (req, res) => {
-    const { answerId, ...rest } = req.body;
+    const { answerId, content } = req.body;
+    if (!answerId || !content)
+      return this.fail(res, {
+        status: 400
+      });
     const result = await Answer.findOneAndUpdate(
       { answerId },
       {
-        content: rest.content,
+        content,
         updateTime: Date.now()
       },
       { new: true }
@@ -159,6 +184,10 @@ class AnswerController extends Router {
 
   voteAnswer = async (req, res) => {
     const { answerId } = req.body;
+    if (!answerId)
+      return this.fail(res, {
+        status: 400
+      });
     const result = await Answer.findOneAndUpdate(
       { answerId },
       {
@@ -174,6 +203,10 @@ class AnswerController extends Router {
 
   checkLineAnswer = async (req, res) => {
     const { answerId } = req.body;
+    if (!answerId)
+      return this.fail(res, {
+        status: 400
+      });
     const result = await Answer.find({ answerId }).catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
