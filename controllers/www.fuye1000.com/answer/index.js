@@ -142,20 +142,17 @@ class AnswerController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const result = await Answer.findOneAndUpdate(
-      { answerId },
-      {
-        answerId,
-        authorName,
-        content,
-        dbName,
-        prevUpVoteNum,
-        questionId,
-        title,
-        createTime: Date.now()
-      },
-      { new: true, upsert: true }
-    ).catch(this.handleSqlError);
+    const newAnswer = new Answer({
+      answerId,
+      authorName,
+      content,
+      dbName,
+      prevUpVoteNum,
+      questionId,
+      title,
+      createTime: Date.now()
+    });
+    const result = await newAnswer.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
       data: result

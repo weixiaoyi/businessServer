@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start_dev": "pm2 start ./ecosystem.config.js",
+    "start_dev": "pm2 start ./ecosystem.config.js --env development",
     "start_pre": "pm2 start ./ecosystem.config.js --env predevelopment",
     "start_pro": "pm2 start ./ecosystem.config.js --env production",
     "delete": "pm2 delete all",
