@@ -9,11 +9,7 @@ class AnswerCommentController extends Router {
 
   init = () => {
     this.authority = new Authority();
-    this.router.get(
-      "/getComments",
-      [this.authority.checkLogin],
-      this.getComments
-    );
+    this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
       [this.authority.checkLogin],

@@ -9,11 +9,7 @@ class AnswerDbController extends Router {
 
   init = () => {
     this.authority = new Authority();
-    this.router.get(
-      "/getAnswerDbs",
-      [this.authority.checkLogin],
-      this.getAnswerDbs
-    );
+    this.router.get("/getAnswerDbs", this.getAnswerDbs);
     this.router.post(
       "/onlineAnswerDb",
       [this.authority.checkLogin],

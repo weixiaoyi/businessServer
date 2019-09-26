@@ -9,11 +9,7 @@ class AnswerController extends Router {
 
   init = () => {
     this.authority = new Authority();
-    this.router.get(
-      "/getAnswers",
-      [this.authority.checkLogin],
-      this.getAnswers
-    );
+    this.router.get("/getAnswers", this.getAnswers);
     this.router.post(
       "/uploadAnswer",
       [this.authority.checkLogin],
