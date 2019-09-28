@@ -15,22 +15,22 @@ class AnswerController extends Router {
       [this.authority.checkAdmin],
       this.uploadAnswer
     );
-    this.router.post(
+    this.router.put(
       "/onlineAnswer",
       [this.authority.checkAdmin],
       this.onlineAnswer
     );
-    this.router.post(
+    this.router.put(
       "/offlineAnswer",
       [this.authority.checkAdmin],
       this.offlineAnswer
     );
-    this.router.post(
+    this.router.delete(
       "/deleteLineAnswer",
       [this.authority.checkAdmin],
       this.deleteLineAnswer
     );
-    this.router.post(
+    this.router.put(
       "/updateLineAnswer",
       [this.authority.checkAdmin],
       this.updateLineAnswer

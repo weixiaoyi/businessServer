@@ -15,17 +15,17 @@ class AnswerDbController extends Router {
       [this.authority.checkAdmin],
       this.onlineAnswerDb
     );
-    this.router.post(
+    this.router.put(
       "/offlineAnswerDb",
       [this.authority.checkAdmin],
       this.offlineAnswerDb
     );
-    this.router.post(
+    this.router.delete(
       "/deleteLineDb",
       [this.authority.checkAdmin],
       this.deleteLineDb
     );
-    this.router.post(
+    this.router.put(
       "/updateLineDb",
       [this.authority.checkAdmin],
       this.updateLineDb
