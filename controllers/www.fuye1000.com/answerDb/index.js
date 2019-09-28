@@ -12,22 +12,22 @@ class AnswerDbController extends Router {
     this.router.get("/getAnswerDbs", this.getAnswerDbs);
     this.router.post(
       "/onlineAnswerDb",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.onlineAnswerDb
     );
     this.router.post(
       "/offlineAnswerDb",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.offlineAnswerDb
     );
     this.router.post(
       "/deleteLineDb",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.deleteLineDb
     );
     this.router.post(
       "/updateLineDb",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.updateLineDb
     );
   };

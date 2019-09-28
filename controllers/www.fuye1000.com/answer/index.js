@@ -12,33 +12,33 @@ class AnswerController extends Router {
     this.router.get("/getAnswers", this.getAnswers);
     this.router.post(
       "/uploadAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.uploadAnswer
     );
     this.router.post(
       "/onlineAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.onlineAnswer
     );
     this.router.post(
       "/offlineAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.offlineAnswer
     );
     this.router.post(
       "/deleteLineAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.deleteLineAnswer
     );
     this.router.post(
       "/updateLineAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.updateLineAnswer
     );
     this.router.post("/voteAnswer", this.voteAnswer);
     this.router.post(
       "/checkLineAnswer",
-      [this.authority.checkLogin],
+      [this.authority.checkAdmin],
       this.checkLineAnswer
     );
   };

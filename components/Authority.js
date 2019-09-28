@@ -21,6 +21,17 @@ class Authority extends Response {
       next();
     }
   };
+  checkAdmin = (req, res, next) => {
+    if (req.headers.signature) {
+      next();
+    } else {
+      return this.fail(res, {
+        status: 401,
+        code: -1,
+        msg: "Unauthorized_NotAdmin"
+      });
+    }
+  };
 }
 
 export default Authority;
