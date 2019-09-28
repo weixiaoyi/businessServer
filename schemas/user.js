@@ -1,10 +1,21 @@
 import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
   password: String,
-  domain: String,
+  domain: {
+    type: String,
+    required: true
+  },
   platform: String, //第三方账号平台
-  userAgent: String, // pc,apple,linux,微信小程序，app
+  userAgent: {
+    type: String,
+    required: true
+  }, // pc,apple,linux,微信小程序，app
   phone: String,
   email: String,
   age: Number,
@@ -13,7 +24,11 @@ const userSchema = new mongoose.Schema({
   address: String,
   createTime: Date,
   updateTime: Date,
-  decrypt: String,
+  decrypt: {
+    type: String,
+    required: true,
+    unique: true
+  },
   other: String
 });
 export default userSchema;

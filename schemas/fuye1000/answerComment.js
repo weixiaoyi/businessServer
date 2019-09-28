@@ -1,8 +1,18 @@
 import mongoose from "mongoose";
 const answerCommentSchema = new mongoose.Schema({
-  answerId: String,
-  accountId: String,
-  comment: String,
+  answerId: {
+    type: String,
+    required: true
+  },
+  accountId: {
+    type: String,
+    required: true
+  },
+  comment: {
+    type: String,
+    required: true,
+    trim: true
+  },
   createTime: Date,
   online: String,
   popUser: {

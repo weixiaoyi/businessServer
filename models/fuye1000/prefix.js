@@ -1,3 +1,3 @@
-const prefix = "fuye1000-";
+const prefix = "fuye-";
 
 export default prefix;

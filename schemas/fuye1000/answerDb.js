@@ -1,9 +1,24 @@
 import mongoose from "mongoose";
 const answerDbSchema = new mongoose.Schema({
-  name: String,
-  desc: String,
-  title: String,
-  intro: String,
+  name: {
+    type: String,
+    required: true
+  },
+  desc: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  intro: {
+    type: String,
+    required: true,
+    trim: true
+  },
   imageUrl: String,
   online: String,
   createTime: Date,
