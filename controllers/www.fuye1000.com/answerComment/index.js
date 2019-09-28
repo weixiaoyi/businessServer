@@ -24,11 +24,16 @@ class AnswerCommentController extends Router {
         status: 400
       });
     const limits = { answerId, ...(online ? { online } : {}) };
-    const total = await AnswerComment.find(limits)
+    const commentConstructor = AnswerComment.find(limits).toConstructor();
+    const total = await commentConstructor()
       .countDocuments()
       .catch(this.handleSqlError);
     if (total === null) return this.fail(res);
-    const data = await AnswerComment.find(limits)
+    const data = await commentConstructor()
+      .populate({
+        path: "popUser",
+        select: "name"
+      })
       .sort({ createTime: -1 })
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
@@ -36,7 +41,7 @@ class AnswerCommentController extends Router {
     if (!data) return this.fail(res);
     return this.success(res, {
       data: data.map(item => ({
-        accountId: item.accountId,
+        name: item.popUser.name,
         comment: item.comment,
         createTime: item.createTime
       })),
@@ -60,13 +65,14 @@ class AnswerCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const { accountId } = req.session.user;
+    const { _id } = req.session.user;
     const newComment = new AnswerComment({
       answerId,
       comment,
-      accountId,
+      accountId: _id,
       createTime: Date.now(),
-      online: "off"
+      online: "on",
+      popUser: _id
     });
     const result = await newComment.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);

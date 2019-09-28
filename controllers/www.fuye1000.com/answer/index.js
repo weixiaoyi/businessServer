@@ -49,12 +49,14 @@ class AnswerController extends Router {
       return this.fail(res, {
         status: 400
       });
+
     const limits = { dbName, ...(online ? { online } : {}) };
-    const total = await Answer.find(limits)
+    const answerConstructor = Answer.find(limits).toConstructor();
+    const total = await answerConstructor()
       .countDocuments()
       .catch(this.handleSqlError);
     if (total === null) return this.fail(res);
-    const data = await Answer.find(limits)
+    const data = await answerConstructor()
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
       .catch(this.handleSqlError);
@@ -200,6 +202,8 @@ class AnswerController extends Router {
       return this.fail(res, {
         status: 400
       });
+
+    // 故意用find,而不是 findOne,避免找不到和catch冲突
     const result = await Answer.find({ answerId }).catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {

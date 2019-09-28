@@ -33,7 +33,7 @@ class UserController extends Router {
   sendUser = (req, res, user) => {
     return this.success(res, {
       data: {
-        accountId: user.accountId,
+        accountId: user._id,
         name: user.name,
         ...(user.phone ? { phone: user.phone } : {}),
         ...(user.email ? { email: user.email } : {})
@@ -76,9 +76,7 @@ class UserController extends Router {
 
   getUserInfo = async (req, res) => {
     const user = req.session.user;
-    const findUser = await User.findOne({ accountId: user.accountId }).catch(
-      this.handleSqlError
-    );
+    const findUser = await User.findById(user._id).catch(this.handleSqlError);
     if (!findUser) {
       return this.fail(res, {
         msg: "账户不存在",
@@ -101,10 +99,8 @@ class UserController extends Router {
         status: 400
       });
     }
-    const updatedUser = await User.findOneAndUpdate(
-      {
-        accountId: user.accountId
-      },
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
       {
         ...(phone ? { phone } : {}),
         ...(email ? { email } : {})
@@ -145,7 +141,6 @@ class UserController extends Router {
       const createUser = async () => {
         const timeNow = Date.now();
         const newUser = new User({
-          accountId: timeNow,
           name,
           password,
           domain,
@@ -239,7 +234,6 @@ class UserController extends Router {
       if (!_.get(userInfo, "id"))
         return this.fail(res, { msg: "获取用户信息失败" });
       user = {
-        accountId: userInfo.id,
         name: `${userInfo.login}_${userInfo.id}`,
         platform: "github"
       };
