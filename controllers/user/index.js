@@ -36,33 +36,32 @@ class UserController extends Router {
         accountId: user.accountId,
         name: user.name,
         ...(user.phone ? { phone: user.phone } : {}),
-        ...(user.email ? { email: user.email } : {}),
-        ...(user.member ? { member: user.member } : {})
+        ...(user.email ? { email: user.email } : {})
       }
     });
   };
 
   login = async (req, res) => {
-    const { accountId, password, ...rest } = req.body;
-    if (!this.checkAccountIdAndPasswordFormat(accountId, password)) {
+    const { domain, name, password, ...rest } = req.body;
+    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
       return this.fail(res, {
         msg: "Bad Request",
         status: 400
       });
     }
-    const user = { accountId, password, ...rest };
+    const user = { domain, name, password, ...rest };
     return this.loginOrRegisterMode(req, res, user, "login");
   };
 
   register = async (req, res) => {
-    const { accountId, password, ...rest } = req.body;
-    if (!this.checkAccountIdAndPasswordFormat(accountId, password)) {
+    const { domain, name, password, ...rest } = req.body;
+    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
       return this.fail(res, {
         msg: "Bad Request",
         status: 400
       });
     }
-    const user = { accountId, password, ...rest };
+    const user = { domain, name, password, ...rest };
     return this.loginOrRegisterMode(req, res, user, "register");
   };
 
@@ -121,8 +120,8 @@ class UserController extends Router {
 
   loginOrRegisterMode = async (req, res, user, mode) => {
     let resultUser = null;
-    const { accountId, password } = user;
-    const findUser = await this.checkUserAccountIdIsExist(accountId);
+    const { domain, name, password } = user;
+    const findUser = await this.checkDomainUserNameIsExist(domain, name);
     if (mode === "login") {
       if (!findUser) {
         return this.fail(res, {
@@ -136,23 +135,23 @@ class UserController extends Router {
       }
       resultUser = findUser;
     } else {
-      const { host, userAgent } = user;
-      if (!host || !userAgent) {
+      const { userAgent } = user;
+      if (!userAgent) {
         return this.fail(res, {
           msg: "Bad Request",
           status: 400
         });
       }
-      const createUser = async (payload = {}) => {
-        const { name = accountId } = payload;
+      const createUser = async () => {
+        const timeNow = Date.now();
         const newUser = new User({
-          accountId, // accountId必须存在，password在第三方登陆或小程序登陆不需要
+          accountId: timeNow,
           name,
-          host,
+          password,
+          domain,
           userAgent,
-          ...payload,
           decrypt: req.decrypt,
-          createTime: Date.now()
+          createTime: timeNow
         });
         return await newUser.save().catch(this.handleSqlError);
       };
@@ -162,23 +161,19 @@ class UserController extends Router {
             msg: "账户名已经存在"
           });
         }
-        const isDecryptExist = await this.checkDecryptIsExist(req.decrypt);
+
+        const isDecryptExist = await this.checkDecryptIsExist(
+          req.decrypt
+        ).catch(this.handleSqlError);
         if (isDecryptExist) {
           return this.fail(res, {
             msg: "Bad Request",
             status: 400
           });
         }
-        resultUser = await createUser({
-          password //正常注册，密码必须有
-        });
+        resultUser = await createUser();
       } else if (mode === "ifNotRegisterThenLogin") {
-        // 第三方快捷登陆，微信小程序登陆
-        if (!findUser) {
-          resultUser = await createUser(); // 不需要密码，不需要
-        } else {
-          resultUser = findUser;
-        }
+        // resultUser = findUser;
       }
       if (!resultUser)
         return this.fail(res, {
@@ -189,18 +184,18 @@ class UserController extends Router {
     return this.sendUser(req, res, resultUser);
   };
 
-  checkUserAccountIdIsExist = async accountId => {
-    return await User.findOne({ accountId }).catch(this.handleSqlError);
+  checkDomainUserNameIsExist = async (domain, name) => {
+    return await User.findOne({ domain, name }).catch(this.handleSqlError);
   };
 
   checkDecryptIsExist = async decrypt => {
     return await User.findOne({ decrypt }).catch(this.handleSqlError);
   };
 
-  checkAccountIdAndPasswordFormat = (accountId, password) => {
+  checkNameAndPasswordFormat = (domain, name, password) => {
+    if (!(domain && name && password)) return false;
     password = decryptString(password);
-    if (!(accountId && password)) return false;
-    if (accountId.length > 20) return false;
+    if (name.length > 20) return false;
     return !(password.length < 6 || password.length > 20);
   };
 
