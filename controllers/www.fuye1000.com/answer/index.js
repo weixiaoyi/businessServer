@@ -5,6 +5,8 @@ class AnswerController extends Router {
   constructor(props) {
     super(props);
     this.init();
+    this.answerView =
+      "answerId authorName content createTime currentUpVoteNum title";
   }
 
   init = () => {
@@ -51,7 +53,10 @@ class AnswerController extends Router {
       });
 
     const limits = { dbName, ...(online ? { online } : {}) };
-    const answerConstructor = Answer.find(limits).toConstructor();
+    const answerConstructor = Answer.find(
+      limits,
+      this.answerView
+    ).toConstructor();
     const total = await answerConstructor()
       .countDocuments()
       .catch(this.handleSqlError);
@@ -62,17 +67,7 @@ class AnswerController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data: data.map(item => ({
-        answerId: item.answerId,
-        authorName: item.authorName,
-        content: item.content,
-        createTime: item.createTime,
-        questionId: item.questionId,
-        currentUpVoteNum: item.currentUpVoteNum,
-        title: item.title,
-        dbName: item.dbName,
-        online: item.online
-      })),
+      data,
       pagination: {
         page,
         pageSize,

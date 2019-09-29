@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 const answerSchema = new mongoose.Schema({
-  answerId: String,
+  answerId: {
+    type: String,
+    required: true,
+    unique: true
+  },
   title: String,
   questionId: String,
   authorName: String,

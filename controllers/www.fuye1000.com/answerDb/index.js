@@ -5,6 +5,7 @@ class AnswerDbController extends Router {
   constructor(props) {
     super(props);
     this.init();
+    this.answerDbView = "createTime intro member name title";
   }
 
   init = () => {
@@ -37,7 +38,10 @@ class AnswerDbController extends Router {
     if (!page || !pageSize) return this.fail(res, { status: 400 });
     const total = await AnswerDb.countDocuments().catch(this.handleSqlError);
     if (total === null) return this.fail(res);
-    const data = await AnswerDb.find(online ? { online } : {})
+    const data = await AnswerDb.find(
+      online ? { online } : {},
+      this.answerDbView
+    )
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
       .catch(this.handleSqlError);

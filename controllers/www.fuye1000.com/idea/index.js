@@ -5,11 +5,12 @@ class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
+    this.ideaView = "accountId title brief createTime";
   }
 
   init = () => {
     this.authority = new Authority();
-    this.router.get("/getIdeas", this.getIdeas);
+    this.router.get("/getIdeasPreview", this.getIdeasPreview);
     this.router.post(
       "/publishIdea",
       [this.authority.checkLogin],
@@ -17,14 +18,14 @@ class IdeaController extends Router {
     );
   };
 
-  getIdeas = async (req, res) => {
+  getIdeasPreview = async (req, res) => {
     const { page, pageSize, online } = req.query;
     if (!page || !pageSize)
       return this.fail(res, {
         status: 400
       });
     const limits = { ...(online ? { online } : {}) };
-    const ideaConstructor = Idea.find(limits).toConstructor();
+    const ideaConstructor = Idea.find(limits, this.ideaView).toConstructor();
     const total = await ideaConstructor()
       .countDocuments()
       .catch(this.handleSqlError);
@@ -40,7 +41,7 @@ class IdeaController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data: data,
+      data,
       pagination: {
         page,
         pageSize,

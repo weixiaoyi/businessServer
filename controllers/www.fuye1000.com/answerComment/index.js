@@ -5,6 +5,7 @@ class AnswerCommentController extends Router {
   constructor(props) {
     super(props);
     this.init();
+    this.commentView = "answerId comment";
   }
 
   init = () => {
@@ -24,7 +25,10 @@ class AnswerCommentController extends Router {
         status: 400
       });
     const limits = { answerId, ...(online ? { online } : {}) };
-    const commentConstructor = AnswerComment.find(limits).toConstructor();
+    const commentConstructor = AnswerComment.find(
+      limits,
+      this.commentView
+    ).toConstructor();
     const total = await commentConstructor()
       .countDocuments()
       .catch(this.handleSqlError);
@@ -40,11 +44,7 @@ class AnswerCommentController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data: data.map(item => ({
-        name: item.popUser.name,
-        comment: item.comment,
-        createTime: item.createTime
-      })),
+      data,
       pagination: {
         page,
         pageSize,
