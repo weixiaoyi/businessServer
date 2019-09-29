@@ -8,10 +8,6 @@ const ideaSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  brief: {
-    type: String,
-    required: true
-  },
   content: {
     type: String,
     required: true

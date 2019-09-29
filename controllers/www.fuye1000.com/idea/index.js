@@ -1,21 +1,24 @@
 import { Router, Authority } from "../../../components";
 import { Idea } from "../../../models";
+import { trimHtml } from "../../../utils";
 
 class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaView = "accountId title brief createTime";
+    this.ideaView = "accountId title content createTime";
   }
 
   init = () => {
     this.authority = new Authority();
     this.router.get("/getIdeasPreview", this.getIdeasPreview);
+    this.router.get("/getIdeaDetail", this.getIdeaDetail);
     this.router.post(
       "/publishIdea",
       [this.authority.checkLogin],
       this.publishIdea
     );
+    this.router.put("/editIdea", [this.authority.checkLogin], this.editIdea);
   };
 
   getIdeasPreview = async (req, res) => {
@@ -41,7 +44,16 @@ class IdeaController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data,
+      data: data.map(item => ({
+        _id: item._id,
+        accountId: item.accountId,
+        title: item.title,
+        brief: trimHtml(item.content, {
+          limit: 30,
+          preserveTags: false,
+          wordBreak: true
+        }).html
+      })),
       pagination: {
         page,
         pageSize,
@@ -50,16 +62,30 @@ class IdeaController extends Router {
     });
   };
 
+  getIdeaDetail = async (req, res) => {
+    const { id } = req.query;
+    if (!id)
+      return this.fail(res, {
+        status: 400
+      });
+    const data = await Idea.findById(id, this.ideaView).catch(
+      this.handleSqlError
+    );
+    if (!data) return this.fail(res);
+    return this.success(res, {
+      data
+    });
+  };
+
   publishIdea = async (req, res) => {
-    const { title, brief, content } = req.body;
-    if (!title || !brief || !content)
+    const { title, content } = req.body;
+    if (!this.checkRequiredParams(title, content))
       return this.fail(res, {
         status: 400
       });
     const { _id } = req.session.user;
     const newIdea = new Idea({
       title,
-      brief,
       content,
       accountId: _id,
       createTime: Date.now(),
@@ -71,6 +97,35 @@ class IdeaController extends Router {
     return this.success(res, {
       data: result
     });
+  };
+
+  editIdea = async (req, res) => {
+    const { id, title, content } = req.body;
+    if (!id || !this.checkRequiredParams(title, content))
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await Idea.findByIdAndUpdate(
+      id,
+      { title, content },
+      { new: true }
+    ).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  checkRequiredParams = (title, content) => {
+    const html = trimHtml(content, { limit: 5000, preserveTags: false }).html;
+    return (
+      title &&
+      content &&
+      title.length >= 5 &&
+      title.length <= 20 &&
+      html.length >= 20 &&
+      html.length <= 1500
+    );
   };
 }
 
