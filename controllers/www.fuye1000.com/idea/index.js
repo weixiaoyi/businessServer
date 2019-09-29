@@ -68,12 +68,21 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const data = await Idea.findById(id, this.ideaView).catch(
-      this.handleSqlError
-    );
+    const data = await Idea.findById(id, this.ideaView)
+      .populate({
+        path: "popUser",
+        select: "name"
+      })
+      .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data
+      data: {
+        accountId: data.accountId,
+        title: data.title,
+        content: data.content,
+        createTime: data.createTime,
+        name: data.popUser.name
+      }
     });
   };
 

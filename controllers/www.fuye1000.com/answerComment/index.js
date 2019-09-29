@@ -44,7 +44,11 @@ class AnswerCommentController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data,
+      data: data.map(item => ({
+        answerId: item.answerId,
+        comment: item.comment,
+        name: item.popUser.name
+      })),
       pagination: {
         page,
         pageSize,
