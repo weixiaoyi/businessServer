@@ -77,6 +77,7 @@ class IdeaController extends Router {
     if (!data) return this.fail(res);
     return this.success(res, {
       data: {
+        _id: data._id,
         accountId: data.accountId,
         title: data.title,
         content: data.content,
