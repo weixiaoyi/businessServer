@@ -76,14 +76,7 @@ class IdeaController extends Router {
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data: {
-        _id: data._id,
-        accountId: data.accountId,
-        title: data.title,
-        content: data.content,
-        createTime: data.createTime,
-        name: data.popUser.name
-      }
+      data
     });
   };
 
