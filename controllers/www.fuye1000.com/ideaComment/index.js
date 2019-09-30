@@ -34,10 +34,16 @@ class IdeaCommentController extends Router {
       .catch(this.handleSqlError);
     if (total === null) return this.fail(res);
     const data = await commentConstructor()
-      .populate({
-        path: "popUser",
-        select: "name"
-      })
+      .populate([
+        {
+          path: "popUser",
+          select: "name"
+        },
+        {
+          path: "popToUser",
+          select: "name"
+        }
+      ])
       .sort({ createTime: -1 })
       .limit(Number(pageSize))
       .skip((page - 1) * pageSize)
@@ -55,17 +61,18 @@ class IdeaCommentController extends Router {
 
   publishComment = async (req, res) => {
     const { ideaId, comment, to } = req.body;
+    const { _id } = req.session.user;
     if (
       !ideaId ||
       !comment ||
       !comment.length ||
       comment.length > 500 ||
-      comment.length < 3
+      comment.length < 3 ||
+      (to && to === _id)
     )
       return this.fail(res, {
         status: 400
       });
-    const { _id } = req.session.user;
     const newComment = new IdeaComment({
       ideaId,
       comment,

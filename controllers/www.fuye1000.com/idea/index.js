@@ -103,13 +103,15 @@ class IdeaController extends Router {
   };
 
   editIdea = async (req, res) => {
+    // 注意判断权限
     const { id, title, content } = req.body;
     if (!id || !this.checkRequiredParams(title, content))
       return this.fail(res, {
         status: 400
       });
-    const result = await Idea.findByIdAndUpdate(
-      id,
+    const { _id } = req.session.user;
+    const result = await Idea.findOneAndUpdate(
+      { _id: id, accountId: _id },
       { title, content },
       { new: true }
     ).catch(this.handleSqlError);
