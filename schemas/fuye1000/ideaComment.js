@@ -17,14 +17,6 @@ const ideaCommentSchema = new mongoose.Schema({
     trim: true
   },
   createTime: Date,
-  online: String,
-  popUser: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
-  },
-  popToUser: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
-  }
+  online: String
 });
 export default ideaCommentSchema;

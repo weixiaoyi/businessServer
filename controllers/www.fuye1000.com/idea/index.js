@@ -2,6 +2,7 @@ import { Router, Authority, Db } from "../../../components";
 import { Idea } from "../../../models";
 import { aggregate, trimHtml } from "../../../utils";
 import { ModelNames } from "../../../constants";
+import _ from "lodash";
 
 class IdeaController extends Router {
   constructor(props) {
@@ -105,6 +106,11 @@ class IdeaController extends Router {
       })
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
+    if (!_.get(data, "length"))
+      return this.fail(res, {
+        status: 400,
+        msg: "未找到指定的副业"
+      });
     return this.success(res, {
       data: data[0]
     });

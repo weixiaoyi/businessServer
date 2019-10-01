@@ -1,16 +1,18 @@
-import { Router, Authority } from "../../../components";
+import { Router, Authority, Db } from "../../../components";
 import { IdeaComment } from "../../../models";
+import { ModelNames } from "../../../constants";
 
 class IdeaCommentController extends Router {
   constructor(props) {
     super(props);
     this.init();
     this.commentView =
-      "answerId accountId toAccountId ideaId comment createTime";
+      "answerId accountId toAccountId ideaId comment createTime popUser._id popUser.name popToUser._id popToUser.name";
   }
 
   init = () => {
     this.authority = new Authority();
+    this.db = new Db();
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
@@ -25,37 +27,50 @@ class IdeaCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const limits = { ideaId, ...(online ? { online } : {}) };
-    const commentConstructor = IdeaComment.find(
-      limits,
-      this.commentView
-    ).toConstructor();
-    const total = await commentConstructor()
-      .countDocuments()
-      .catch(this.handleSqlError);
-    if (total === null) return this.fail(res);
-    const data = await commentConstructor()
-      .populate([
-        {
-          path: "popUser",
-          select: "name"
+
+    const result = await this.db
+      .handlePage({
+        Model: IdeaComment,
+        pagination: { page, pageSize },
+        match: {
+          ideaId: this.db.ObjectId(ideaId),
+          ...(online ? { online } : {})
         },
-        {
-          path: "popToUser",
-          select: "name"
+        project: this.commentView,
+        lookup: [
+          {
+            from: ModelNames.user,
+            localField: "accountId",
+            foreignField: "_id",
+            as: "popUser"
+          },
+          {
+            from: ModelNames.user,
+            localField: "toAccountId",
+            foreignField: "_id",
+            as: "popToUser"
+          }
+        ],
+        sort: {
+          createTime: -1
+        },
+        map: item => {
+          return {
+            ...item,
+            popUser: item.popUser[0],
+            popToUser: item.popToUser[0]
+          };
         }
-      ])
-      .sort({ createTime: -1 })
-      .limit(Number(pageSize))
-      .skip((page - 1) * pageSize)
+      })
       .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+
+    if (!result) return this.fail(res);
     return this.success(res, {
-      data,
+      data: result.data,
       pagination: {
         page,
         pageSize,
-        total
+        total: result.total
       }
     });
   };
@@ -80,11 +95,9 @@ class IdeaCommentController extends Router {
       accountId: _id,
       createTime: Date.now(),
       online: "on",
-      popUser: _id,
       ...(to
         ? {
-            toAccountId: to,
-            popToUser: to
+            toAccountId: to
           }
         : {})
     });

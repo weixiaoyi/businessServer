@@ -43,11 +43,13 @@ class Db {
           ])
           .concat(
             lookup
-              ? [
-                  {
-                    $lookup: lookup
-                  }
-                ]
+              ? _.isArray(lookup)
+                ? lookup.map(item => ({ $lookup: item }))
+                : [
+                    {
+                      $lookup: lookup
+                    }
+                  ]
               : []
           )
           .concat(
@@ -132,7 +134,7 @@ class Db {
 
 export default Db;
 
-// AnswerComment.aggregate([
+// IdeaComment.aggregate([
 //   {
 //     $match: { answerId, ...(online ? { online } : {}) }
 //   }
