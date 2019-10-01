@@ -34,7 +34,15 @@ class Response {
     return null;
   };
 
-  handlePage = async ({ Model, match, pagination, project, lookup, map }) => {
+  handlePage = async ({
+    Model,
+    match,
+    pagination,
+    project,
+    lookup,
+    map,
+    sort
+  }) => {
     if (!Model || !pagination) return console.error("handlePage参数错误");
     const res = await Model.aggregate(
       [].concat(
@@ -69,6 +77,15 @@ class Response {
               ? [
                   {
                     $lookup: lookup
+                  }
+                ]
+              : []
+          )
+          .concat(
+            sort
+              ? [
+                  {
+                    $sort: sort
                   }
                 ]
               : []

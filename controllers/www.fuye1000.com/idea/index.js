@@ -1,6 +1,7 @@
 import { Router, Authority } from "../../../components";
 import { Idea } from "../../../models";
-import { trimHtml } from "../../../utils";
+import { aggregate, trimHtml } from "../../../utils";
+import { ModelNames } from "../../../constants";
 
 class IdeaController extends Router {
   constructor(props) {
@@ -27,37 +28,48 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const limits = { ...(online ? { online } : {}) };
-    const ideaConstructor = Idea.find(limits, this.ideaView).toConstructor();
-    const total = await ideaConstructor()
-      .countDocuments()
-      .catch(this.handleSqlError);
-    if (total === null) return this.fail(res);
-    const data = await ideaConstructor()
-      .populate({
-        path: "popUser",
-        select: "name"
-      })
-      .sort({ createTime: -1 })
-      .limit(Number(pageSize))
-      .skip((page - 1) * pageSize)
-      .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+
+    const result = await this.handlePage({
+      Model: Idea,
+      pagination: { page, pageSize },
+      match: {
+        ...(online ? { online } : {})
+      },
+      lookup: {
+        from: ModelNames.ideaComment,
+        localField: "_id",
+        foreignField: "ideaId",
+        as: "popIdeaComment"
+      },
+      project: aggregate.project(this.ideaView, {
+        computedCommentsNum: {
+          $size: {
+            $filter: {
+              input: "$popIdeaComment",
+              as: "item",
+              cond: { $eq: ["$$item.online", "on"] }
+            }
+          }
+        }
+      }),
+      map: item => {
+        return {
+          ...item,
+          brief: trimHtml(item.content, {
+            limit: 30,
+            preserveTags: false,
+            wordBreak: true
+          }).html
+        };
+      }
+    }).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
     return this.success(res, {
-      data: data.map(item => ({
-        _id: item._id,
-        accountId: item.accountId,
-        title: item.title,
-        brief: trimHtml(item.content, {
-          limit: 30,
-          preserveTags: false,
-          wordBreak: true
-        }).html
-      })),
+      data: result.data,
       pagination: {
         page,
         pageSize,
-        total
+        total: result.total
       }
     });
   };

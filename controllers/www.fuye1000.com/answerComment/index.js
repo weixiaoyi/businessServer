@@ -39,6 +39,9 @@ class AnswerCommentController extends Router {
         foreignField: "_id",
         as: "popUser"
       },
+      sort: {
+        createTime: -1
+      },
       map: item => {
         return {
           ...item,
