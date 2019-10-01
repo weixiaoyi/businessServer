@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const ideaSchema = new mongoose.Schema({
   accountId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true
   },
   title: {

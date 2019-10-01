@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 const ideaCommentSchema = new mongoose.Schema({
   accountId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true
   },
-  toAccountId: String,
+  toAccountId: {
+    type: mongoose.Schema.Types.ObjectId
+  },
   ideaId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true
   },
   comment: {

@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import { ideaCommentSchema } from "../../schemas";
 import prefix from "./prefix";
 const IdeaComment = mongoose.model(
-  `${prefix}ideaCommentSchema`,
+  `${prefix}ideaComment`,
   ideaCommentSchema,
-  `${prefix}ideaCommentSchema`
+  `${prefix}ideaComment`
 );
 
 export default IdeaComment;
