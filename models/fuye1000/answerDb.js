@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { answerDbSchema } from "../../schemas";
-import prefix from "./prefix";
+import { ModelNames } from "../../constants";
+
 const AnswerDb = mongoose.model(
-  `${prefix}answerDb`,
+  ModelNames.answerDb,
   answerDbSchema,
-  `${prefix}answerDb`
+  ModelNames.answerDb
 );
 
 export default AnswerDb;

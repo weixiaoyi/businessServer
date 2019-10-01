@@ -1,11 +1,12 @@
 import { Router, Authority } from "../../../components";
 import { AnswerComment } from "../../../models";
+import { ModelNames } from "../../../constants";
 
 class AnswerCommentController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.commentView = "answerId accountId comment";
+    this.commentView = "answerId accountId comment popUser.name";
   }
 
   init = () => {
@@ -24,31 +25,35 @@ class AnswerCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const limits = { answerId, ...(online ? { online } : {}) };
-    const commentConstructor = AnswerComment.find(
-      limits,
-      this.commentView
-    ).toConstructor();
-    const total = await commentConstructor()
-      .countDocuments()
-      .catch(this.handleSqlError);
-    if (total === null) return this.fail(res);
-    const data = await commentConstructor()
-      .populate({
-        path: "popUser",
-        select: "name"
-      })
-      .sort({ createTime: -1 })
-      .limit(Number(pageSize))
-      .skip((page - 1) * pageSize)
-      .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+    const result = await this.handlePage({
+      Model: AnswerComment,
+      pagination: { page, pageSize },
+      match: {
+        answerId,
+        ...(online ? { online } : {})
+      },
+      project: this.commentView,
+      lookup: {
+        from: ModelNames.user,
+        localField: "accountId",
+        foreignField: "_id",
+        as: "popUser"
+      },
+      map: item => {
+        return {
+          ...item,
+          popUser: item.popUser[0]
+        };
+      }
+    }).catch(this.handleSqlError);
+
+    if (!result) return this.fail(res);
     return this.success(res, {
-      data,
+      data: result.data,
       pagination: {
         page,
         pageSize,
-        total
+        total: result.total
       }
     });
   };
@@ -71,8 +76,7 @@ class AnswerCommentController extends Router {
       comment,
       accountId: _id,
       createTime: Date.now(),
-      online: "on",
-      popUser: _id
+      online: "on"
     });
     const result = await newComment.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);

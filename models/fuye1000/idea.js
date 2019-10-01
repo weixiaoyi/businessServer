@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { ideaSchema } from "../../schemas";
-import prefix from "./prefix";
-const Idea = mongoose.model(`${prefix}idea`, ideaSchema, `${prefix}idea`);
+import { ModelNames } from "../../constants";
+
+const Idea = mongoose.model(ModelNames.idea, ideaSchema, ModelNames.idea);
 
 export default Idea;

@@ -55,7 +55,7 @@ class AnswerController extends Router {
     const result = await this.handlePage({
       Model: Answer,
       pagination: { page, pageSize },
-      filters: {
+      match: {
         dbName,
         ...(online ? { online } : {})
       },

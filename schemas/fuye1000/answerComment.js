@@ -14,10 +14,6 @@ const answerCommentSchema = new mongoose.Schema({
     trim: true
   },
   createTime: Date,
-  online: String,
-  popUser: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
-  }
+  online: String
 });
 export default answerCommentSchema;

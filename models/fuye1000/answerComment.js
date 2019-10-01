@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { answerCommentSchema } from "../../schemas";
-import prefix from "./prefix";
+import { ModelNames } from "../../constants";
+
 const AnswerComment = mongoose.model(
-  `${prefix}answerComment`,
+  ModelNames.answerComment,
   answerCommentSchema,
-  `${prefix}answerComment`
+  ModelNames.answerComment
 );
 
 export default AnswerComment;

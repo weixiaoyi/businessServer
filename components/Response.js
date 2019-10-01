@@ -34,14 +34,14 @@ class Response {
     return null;
   };
 
-  handlePage = async ({ Model, filters, pagination, project }) => {
+  handlePage = async ({ Model, match, pagination, project, lookup, map }) => {
     if (!Model || !pagination) return console.error("handlePage参数错误");
     const res = await Model.aggregate(
       [].concat(
-        filters
+        match
           ? [
               {
-                $match: filters
+                $match: match
               }
             ]
           : []
@@ -65,6 +65,15 @@ class Response {
             }
           ])
           .concat(
+            lookup
+              ? [
+                  {
+                    $lookup: lookup
+                  }
+                ]
+              : []
+          )
+          .concat(
             project
               ? [
                   {
@@ -81,9 +90,37 @@ class Response {
     if (!data) return Promise.reject("分页错误");
     return {
       total,
-      data
+      data: map ? data.map(map) : data
     };
   };
 }
 
 export default Response;
+
+// AnswerComment.aggregate([
+//   {
+//     $match: { answerId, ...(online ? { online } : {}) }
+//   }
+// ])
+//   .facet({
+//     total: [
+//       {
+//         $count: "total"
+//       }
+//     ],
+//     data: [
+//       { $skip: (page - 1) * pageSize },
+//       { $limit: Number(pageSize) },
+//       {
+//         $lookup: {
+//           from: "user",
+//           localField: "accountId",
+//           foreignField: "_id",
+//           as: "popUser"
+//         }
+//       }
+//     ]
+//   })
+//   .then(res => {
+//     //console.log(res[0].data[0].look);
+//   });
