@@ -13,10 +13,6 @@ const ideaSchema = new mongoose.Schema({
     required: true
   },
   createTime: Date,
-  online: String,
-  popUser: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
-  }
+  online: String
 });
 export default ideaSchema;

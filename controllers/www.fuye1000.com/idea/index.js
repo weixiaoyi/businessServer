@@ -1,4 +1,4 @@
-import { Router, Authority } from "../../../components";
+import { Router, Authority, Db } from "../../../components";
 import { Idea } from "../../../models";
 import { aggregate, trimHtml } from "../../../utils";
 import { ModelNames } from "../../../constants";
@@ -7,11 +7,12 @@ class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaView = "accountId title content createTime";
+    this.ideaView = "accountId title content createTime popUser.name";
   }
 
   init = () => {
     this.authority = new Authority();
+    this.db = new Db();
     this.router.get("/getIdeasPreview", this.getIdeasPreview);
     this.router.get("/getIdeaDetail", this.getIdeaDetail);
     this.router.post(
@@ -29,40 +30,42 @@ class IdeaController extends Router {
         status: 400
       });
 
-    const result = await this.handlePage({
-      Model: Idea,
-      pagination: { page, pageSize },
-      match: {
-        ...(online ? { online } : {})
-      },
-      lookup: {
-        from: ModelNames.ideaComment,
-        localField: "_id",
-        foreignField: "ideaId",
-        as: "popIdeaComment"
-      },
-      project: aggregate.project(this.ideaView, {
-        computedCommentsNum: {
-          $size: {
-            $filter: {
-              input: "$popIdeaComment",
-              as: "item",
-              cond: { $eq: ["$$item.online", "on"] }
+    const result = await this.db
+      .handlePage({
+        Model: Idea,
+        pagination: { page, pageSize },
+        match: {
+          ...(online ? { online } : {})
+        },
+        lookup: {
+          from: ModelNames.ideaComment,
+          localField: "_id",
+          foreignField: "ideaId",
+          as: "popIdeaComment"
+        },
+        project: aggregate.project(this.ideaView, {
+          computedCommentsNum: {
+            $size: {
+              $filter: {
+                input: "$popIdeaComment",
+                as: "item",
+                cond: { $eq: ["$$item.online", "on"] }
+              }
             }
           }
+        }),
+        map: item => {
+          return {
+            ...item,
+            brief: trimHtml(item.content, {
+              limit: 30,
+              preserveTags: false,
+              wordBreak: true
+            }).html
+          };
         }
-      }),
-      map: item => {
-        return {
-          ...item,
-          brief: trimHtml(item.content, {
-            limit: 30,
-            preserveTags: false,
-            wordBreak: true
-          }).html
-        };
-      }
-    }).catch(this.handleSqlError);
+      })
+      .catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
       data: result.data,
@@ -80,15 +83,30 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const data = await Idea.findById(id, this.ideaView)
-      .populate({
-        path: "popUser",
-        select: "name"
+    const data = await this.db
+      .handleAggregate({
+        Model: Idea,
+        match: {
+          _id: this.db.ObjectId(id)
+        },
+        lookup: {
+          from: ModelNames.user,
+          localField: "accountId",
+          foreignField: "_id",
+          as: "popUser"
+        },
+        project: this.ideaView,
+        map: item => {
+          return {
+            ...item,
+            popUser: item.popUser[0]
+          };
+        }
       })
       .catch(this.handleSqlError);
     if (!data) return this.fail(res);
     return this.success(res, {
-      data
+      data: data[0]
     });
   };
 
@@ -100,12 +118,11 @@ class IdeaController extends Router {
       });
     const { _id } = req.session.user;
     const newIdea = new Idea({
+      accountId: _id,
       title,
       content,
-      accountId: _id,
       createTime: Date.now(),
-      online: "on",
-      popUser: _id
+      online: "on"
     });
     const result = await newIdea.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);

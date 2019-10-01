@@ -1,4 +1,4 @@
-import { Router, Authority } from "../../../components";
+import { Router, Authority, Db } from "../../../components";
 import { Answer } from "../../../models";
 
 class AnswerController extends Router {
@@ -11,6 +11,7 @@ class AnswerController extends Router {
 
   init = () => {
     this.authority = new Authority();
+    this.db = new Db();
     this.router.get("/getAnswers", this.getAnswers);
     this.router.post(
       "/uploadAnswer",
@@ -52,15 +53,17 @@ class AnswerController extends Router {
         status: 400
       });
 
-    const result = await this.handlePage({
-      Model: Answer,
-      pagination: { page, pageSize },
-      match: {
-        dbName,
-        ...(online ? { online } : {})
-      },
-      project: this.answerView
-    }).catch(this.handleSqlError);
+    const result = await this.db
+      .handlePage({
+        Model: Answer,
+        pagination: { page, pageSize },
+        match: {
+          dbName,
+          ...(online ? { online } : {})
+        },
+        project: this.answerView
+      })
+      .catch(this.handleSqlError);
 
     if (!result) return this.fail(res);
     return this.success(res, {

@@ -1,4 +1,4 @@
-import { Router, Authority } from "../../../components";
+import { Router, Authority, Db } from "../../../components";
 import { AnswerComment } from "../../../models";
 import { ModelNames } from "../../../constants";
 
@@ -11,6 +11,7 @@ class AnswerCommentController extends Router {
 
   init = () => {
     this.authority = new Authority();
+    this.db = new Db();
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
@@ -25,30 +26,32 @@ class AnswerCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const result = await this.handlePage({
-      Model: AnswerComment,
-      pagination: { page, pageSize },
-      match: {
-        answerId,
-        ...(online ? { online } : {})
-      },
-      project: this.commentView,
-      lookup: {
-        from: ModelNames.user,
-        localField: "accountId",
-        foreignField: "_id",
-        as: "popUser"
-      },
-      sort: {
-        createTime: -1
-      },
-      map: item => {
-        return {
-          ...item,
-          popUser: item.popUser[0]
-        };
-      }
-    }).catch(this.handleSqlError);
+    const result = await this.db
+      .handlePage({
+        Model: AnswerComment,
+        pagination: { page, pageSize },
+        match: {
+          answerId,
+          ...(online ? { online } : {})
+        },
+        project: this.commentView,
+        lookup: {
+          from: ModelNames.user,
+          localField: "accountId",
+          foreignField: "_id",
+          as: "popUser"
+        },
+        sort: {
+          createTime: -1
+        },
+        map: item => {
+          return {
+            ...item,
+            popUser: item.popUser[0]
+          };
+        }
+      })
+      .catch(this.handleSqlError);
 
     if (!result) return this.fail(res);
     return this.success(res, {
