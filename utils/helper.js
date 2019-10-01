@@ -26,3 +26,17 @@ export const trimHtml = (_html, options = {}) => {
     };
   }
 };
+
+export const aggregate = {
+  project: (string, options = {}) => {
+    const keys = string.split(" ").filter(item => item);
+    const obj = keys.reduce((sum, next) => {
+      sum[next] = 1;
+      return sum;
+    }, {});
+    return {
+      ...obj,
+      ...options
+    };
+  }
+};

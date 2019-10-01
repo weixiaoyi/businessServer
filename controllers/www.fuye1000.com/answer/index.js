@@ -52,26 +52,23 @@ class AnswerController extends Router {
         status: 400
       });
 
-    const limits = { dbName, ...(online ? { online } : {}) };
-    const answerConstructor = Answer.find(
-      limits,
-      this.answerView
-    ).toConstructor();
-    const total = await answerConstructor()
-      .countDocuments()
-      .catch(this.handleSqlError);
-    if (total === null) return this.fail(res);
-    const data = await answerConstructor()
-      .limit(Number(pageSize))
-      .skip((page - 1) * pageSize)
-      .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+    const result = await this.handlePage({
+      Model: Answer,
+      pagination: { page, pageSize },
+      filters: {
+        dbName,
+        ...(online ? { online } : {})
+      },
+      project: this.answerView
+    }).catch(this.handleSqlError);
+
+    if (!result) return this.fail(res);
     return this.success(res, {
-      data,
+      data: result.data,
       pagination: {
         page,
         pageSize,
-        total
+        total: result.total
       }
     });
   };
