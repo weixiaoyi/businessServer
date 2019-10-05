@@ -1,4 +1,4 @@
-import { Router, Authority, Db } from "../../../components";
+import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { Idea } from "../../../models";
 import { aggregate, trimHtml } from "../../../utils";
 import { ModelNames } from "../../../constants";
@@ -8,12 +8,14 @@ class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaView = "accountId title content createTime popUser.name";
+    this.ideaView = "accountId title content createTime popUser.name online";
   }
 
   init = () => {
     this.authority = new Authority();
     this.db = new Db();
+    this.validator = new Validator();
+    this.env = new Env();
     this.router.get("/getIdeasPreview", this.getIdeasPreview);
     this.router.get("/getIdeaDetail", this.getIdeaDetail);
     this.router.post(
@@ -26,7 +28,22 @@ class IdeaController extends Router {
 
   getIdeasPreview = async (req, res) => {
     const { page, pageSize, online } = req.query;
-    if (!page || !pageSize)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      },
+      {
+        field: "online",
+        type: this.env.isCustomer(req) ? "equals" : undefined,
+        payload: "on"
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });
@@ -83,7 +100,13 @@ class IdeaController extends Router {
 
   getIdeaDetail = async (req, res) => {
     const { id } = req.query;
-    if (!id)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "id",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });
@@ -143,7 +166,13 @@ class IdeaController extends Router {
   editIdea = async (req, res) => {
     // 注意判断权限
     const { id, title, content } = req.body;
-    if (!id || !this.checkRequiredParams(title, content))
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid || !this.checkRequiredParams(title, content))
       return this.fail(res, {
         status: 400
       });
@@ -161,14 +190,28 @@ class IdeaController extends Router {
 
   checkRequiredParams = (title, content) => {
     const html = trimHtml(content, { limit: 5000, preserveTags: false }).html;
-    return (
-      title &&
-      content &&
-      title.length >= 5 &&
-      title.length <= 20 &&
-      html.length >= 20 &&
-      html.length <= 1500
-    );
+    return this.validator.validate(undefined, [
+      {
+        value: content,
+        type: "required"
+      },
+      {
+        value: title,
+        type: "isLength",
+        payload: {
+          min: 5,
+          max: 20
+        }
+      },
+      {
+        value: html,
+        type: "isLength",
+        payload: {
+          min: 20,
+          max: 1500
+        }
+      }
+    ]);
   };
 }
 

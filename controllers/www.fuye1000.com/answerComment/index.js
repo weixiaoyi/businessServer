@@ -1,4 +1,4 @@
-import { Router, Authority, Db } from "../../../components";
+import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { AnswerComment } from "../../../models";
 import { ModelNames } from "../../../constants";
 
@@ -12,6 +12,8 @@ class AnswerCommentController extends Router {
   init = () => {
     this.authority = new Authority();
     this.db = new Db();
+    this.validator = new Validator();
+    this.env = new Env();
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
@@ -22,7 +24,26 @@ class AnswerCommentController extends Router {
 
   getComments = async (req, res) => {
     const { page, pageSize, answerId, online } = req.query;
-    if (!page || !pageSize || !answerId)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      },
+      {
+        field: "answerId",
+        type: "required"
+      },
+      {
+        field: "online",
+        type: this.env.isCustomer(req) ? "equals" : undefined,
+        payload: "on"
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });
@@ -66,13 +87,21 @@ class AnswerCommentController extends Router {
 
   publishComment = async (req, res) => {
     const { answerId, comment } = req.body;
-    if (
-      !answerId ||
-      !comment ||
-      !comment.length ||
-      comment.length > 200 ||
-      comment.length < 10
-    )
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "answerId",
+        type: "required"
+      },
+      {
+        field: "comment",
+        type: "isLength",
+        payload: {
+          min: 10,
+          max: 200
+        }
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });

@@ -1,4 +1,4 @@
-import { Router, Authority, Db } from "../../../components";
+import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { IdeaComment } from "../../../models";
 import { ModelNames } from "../../../constants";
 
@@ -7,12 +7,14 @@ class IdeaCommentController extends Router {
     super(props);
     this.init();
     this.commentView =
-      "answerId accountId toAccountId ideaId comment createTime popUser._id popUser.name popToUser._id popToUser.name";
+      "answerId accountId toAccountId ideaId comment createTime popUser._id popUser.name popToUser._id popToUser.name online";
   }
 
   init = () => {
     this.authority = new Authority();
     this.db = new Db();
+    this.validator = new Validator();
+    this.env = new Env();
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
@@ -23,7 +25,26 @@ class IdeaCommentController extends Router {
 
   getComments = async (req, res) => {
     const { page, pageSize, ideaId, online } = req.query;
-    if (!page || !pageSize || !ideaId)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      },
+      {
+        field: "ideaId",
+        type: "isMongoId"
+      },
+      {
+        field: "online",
+        type: this.env.isCustomer(req) ? "equals" : undefined,
+        payload: "on"
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });
@@ -78,14 +99,25 @@ class IdeaCommentController extends Router {
   publishComment = async (req, res) => {
     const { ideaId, comment, to } = req.body;
     const { _id } = req.session.user;
-    if (
-      !ideaId ||
-      !comment ||
-      !comment.length ||
-      comment.length > 500 ||
-      comment.length < 3 ||
-      (to && to === _id)
-    )
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "comment",
+        type: "isLength",
+        payload: {
+          min: 3,
+          max: 500
+        }
+      },
+      {
+        field: "to",
+        type: to ? "isMongoId" : undefined
+      },
+      {
+        field: "ideaId",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid || to === _id)
       return this.fail(res, {
         status: 400
       });

@@ -4,13 +4,22 @@ import validator from "validator";
 class Validator {
   validate = (paramsPayload, arrays) => {
     return arrays.every(item => {
-      if (_.isFunction(item.transform)) {
-        paramsPayload[[item.field]] = item.transform(
-          paramsPayload[[item.field]]
-        );
+      let value = null;
+      if (paramsPayload) {
+        if (paramsPayload[[item.field]] && paramsPayload[[item.field]].trim) {
+          paramsPayload[[item.field]] = paramsPayload[[item.field]].trim();
+        }
+        if (_.isFunction(item.transform)) {
+          paramsPayload[[item.field]] = item.transform(
+            paramsPayload[[item.field]]
+          );
+        }
+        value = paramsPayload[[item.field]];
+      } else {
+        value = item.value;
       }
-      const value = paramsPayload[[item.field]];
-      if (!(item && item.field)) {
+
+      if (paramsPayload && !(item && item.field)) {
         console.error("validate参数错误,field必须存在");
       }
       if (!item.type) return true;
@@ -19,6 +28,9 @@ class Validator {
       } else if (_.isFunction(item.validator)) {
         return item.validator(value);
       } else if (_.isFunction(validator[[item.type]])) {
+        if (value === null || value === undefined) {
+          return false;
+        }
         return validator[[item.type]](
           value,
           item.payload ? item.payload : undefined

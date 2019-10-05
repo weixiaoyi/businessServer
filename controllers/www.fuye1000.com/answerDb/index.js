@@ -1,4 +1,4 @@
-import { Router, Authority } from "../../../components";
+import { Router, Authority, Validator, Env, Db } from "../../../components";
 import { AnswerDb } from "../../../models";
 
 class AnswerDbController extends Router {
@@ -10,6 +10,9 @@ class AnswerDbController extends Router {
 
   init = () => {
     this.authority = new Authority();
+    this.db = new Db();
+    this.validator = new Validator();
+    this.env = new Env();
     this.router.get("/getAnswerDbs", this.getAnswerDbs);
     this.router.post(
       "/onlineAnswerDb",
@@ -35,23 +38,39 @@ class AnswerDbController extends Router {
 
   getAnswerDbs = async (req, res) => {
     const { page, pageSize, online } = req.query;
-    if (!page || !pageSize) return this.fail(res, { status: 400 });
-    const total = await AnswerDb.countDocuments().catch(this.handleSqlError);
-    if (total === null) return this.fail(res);
-    const data = await AnswerDb.find(
-      online ? { online } : {},
-      this.answerDbView
-    )
-      .limit(Number(pageSize))
-      .skip((page - 1) * pageSize)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      },
+      {
+        field: "online",
+        type: this.env.isCustomer(req) ? "equals" : undefined,
+        payload: "on"
+      }
+    ]);
+    if (!isValid) return this.fail(res, { status: 400 });
+    const result = await this.db
+      .handlePage({
+        Model: AnswerDb,
+        pagination: { page, pageSize },
+        match: {
+          ...(online ? { online } : {})
+        },
+        project: this.answerDbView
+      })
       .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+    if (!result) return this.fail(res);
     return this.success(res, {
-      data,
+      data: result.data,
       pagination: {
         page,
         pageSize,
-        total
+        total: result.total
       }
     });
   };
