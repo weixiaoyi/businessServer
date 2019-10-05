@@ -38,6 +38,9 @@ class IdeaController extends Router {
         match: {
           ...(online ? { online } : {})
         },
+        sort: {
+          createTime: -1
+        },
         lookup: {
           from: ModelNames.ideaComment,
           localField: "_id",

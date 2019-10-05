@@ -1,7 +1,13 @@
 import Response from "./Response";
+import Env from "./Env";
+
 class Authority extends Response {
+  constructor(props) {
+    super(props);
+    this.env = new Env();
+  }
   checkLogin = (req, res, next) => {
-    if ((req.session && req.session.user) || req.headers.signature) {
+    if ((req.session && req.session.user) || this.env.isAdmin(req)) {
       next();
     } else {
       return this.fail(res, {
@@ -22,7 +28,7 @@ class Authority extends Response {
     }
   };
   checkAdmin = (req, res, next) => {
-    if (req.headers.signature) {
+    if (this.env.isAdmin(req)) {
       next();
     } else {
       return this.fail(res, {

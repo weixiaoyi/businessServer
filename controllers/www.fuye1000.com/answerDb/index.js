@@ -5,7 +5,7 @@ class AnswerDbController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.answerDbView = "createTime intro member name title";
+    this.answerDbView = "createTime intro member name title online";
   }
 
   init = () => {

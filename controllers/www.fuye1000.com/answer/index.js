@@ -1,4 +1,4 @@
-import { Router, Authority, Db } from "../../../components";
+import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { Answer } from "../../../models";
 
 class AnswerController extends Router {
@@ -6,12 +6,14 @@ class AnswerController extends Router {
     super(props);
     this.init();
     this.answerView =
-      "answerId authorName content createTime currentUpVoteNum title";
+      "answerId authorName content createTime currentUpVoteNum title online";
   }
 
   init = () => {
     this.authority = new Authority();
     this.db = new Db();
+    this.validator = new Validator();
+    this.env = new Env();
     this.router.get("/getAnswers", this.getAnswers);
     this.router.post(
       "/uploadAnswer",
@@ -48,7 +50,32 @@ class AnswerController extends Router {
 
   getAnswers = async (req, res) => {
     const { page, pageSize, dbName, online } = req.query;
-    if (!page || !pageSize || !dbName)
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt",
+        payload: this.env.isCustomer(req)
+          ? {
+              min: 1,
+              max: 1
+            }
+          : undefined
+      },
+      {
+        field: "dbName",
+        type: "required"
+      },
+      {
+        field: "online",
+        type: this.env.isCustomer(req) ? "equals" : undefined,
+        payload: "on"
+      }
+    ]);
+    if (!isValid)
       return this.fail(res, {
         status: 400
       });

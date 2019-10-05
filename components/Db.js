@@ -31,6 +31,15 @@ class Db {
           }
         ],
         data: []
+          .concat(
+            sort
+              ? [
+                  {
+                    $sort: sort
+                  }
+                ]
+              : []
+          )
           .concat([
             {
               $skip: (pagination.page - 1) * pagination.pageSize
@@ -50,15 +59,6 @@ class Db {
                       $lookup: lookup
                     }
                   ]
-              : []
-          )
-          .concat(
-            sort
-              ? [
-                  {
-                    $sort: sort
-                  }
-                ]
               : []
           )
           .concat(
@@ -105,21 +105,21 @@ class Db {
             : []
         )
         .concat(
-          sort
-            ? [
-                {
-                  $sort: sort
-                }
-              ]
-            : []
-        )
-        .concat(
           project
             ? [
                 {
                   $project: _.isString(project)
                     ? aggregate.project(project)
                     : project
+                }
+              ]
+            : []
+        )
+        .concat(
+          sort
+            ? [
+                {
+                  $sort: sort
                 }
               ]
             : []
