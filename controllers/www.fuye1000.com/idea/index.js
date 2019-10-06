@@ -18,6 +18,11 @@ class IdeaController extends Router {
     this.db = new Db();
     this.validator = new Validator();
     this.env = new Env();
+    this.router.get(
+      "/getMyIdeas",
+      [this.authority.checkLogin],
+      this.getMyIdeas
+    );
     this.router.get("/getIdeasPreview", this.getIdeasPreview);
     this.router.get("/getIdeaDetail", this.getIdeaDetail);
     this.router.post(
@@ -28,8 +33,13 @@ class IdeaController extends Router {
     this.router.put("/editIdea", [this.authority.checkLogin], this.editIdea);
   };
 
+  getMyIdeas = async (req, res) => {
+    req.query.mine = true;
+    return this.getIdeasPreview(req, res);
+  };
+
   getIdeasPreview = async (req, res) => {
-    const { page, pageSize, online } = req.query;
+    const { page, pageSize, online, mine } = req.query;
     const isValid = this.validator.validate(req.query, [
       {
         field: "page",
@@ -50,13 +60,14 @@ class IdeaController extends Router {
         status: 400
       });
 
-    const { _id } = req.session.user;
+    const _id = _.get(req.session, "user._id");
     const result = await this.db
       .handlePage({
         Model: Idea,
         pagination: { page, pageSize },
         match: {
-          ...(online ? { online } : {})
+          ...(online ? { online } : {}),
+          ...(mine ? { accountId: this.db.ObjectId(_id) } : {})
         },
         sort: {
           createTime: -1

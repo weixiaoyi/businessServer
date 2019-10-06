@@ -17,7 +17,11 @@ class IdeaInterestController extends Router {
     this.db = new Db();
     this.validator = new Validator();
     this.env = new Env();
-    this.router.get("/getInterest", this.getInterest);
+    this.router.get(
+      "/getInterest",
+      [this.authority.checkLogin],
+      this.getInterest
+    );
     this.router.post(
       "/operationInterest",
       [this.authority.checkLogin],
@@ -150,14 +154,18 @@ class IdeaInterestController extends Router {
         status: 400
       });
     let result;
+    const findLimit = {
+      ideaId,
+      accountId: _id
+    };
     if (action === "add") {
       result = await IdeaInterest.findOneAndUpdate(
-        { ideaId },
+        findLimit,
         { accountId: _id, ideaId, createTime: Date.now() },
         { new: true, upsert: true }
       ).catch(this.handleSqlError);
     } else if (action === "delete") {
-      result = await IdeaInterest.findOneAndRemove({ ideaId }).catch(
+      result = await IdeaInterest.findOneAndRemove(findLimit).catch(
         this.handleSqlError
       );
     }
