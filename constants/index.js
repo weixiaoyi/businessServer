@@ -13,5 +13,6 @@ export const ModelNames = {
   answerComment: `${fuyePrefix}answerComment`,
   answerDb: `${fuyePrefix}answerDb`,
   idea: `${fuyePrefix}idea`,
-  ideaComment: `${fuyePrefix}ideaComment`
+  ideaComment: `${fuyePrefix}ideaComment`,
+  ideaInterest: `${fuyePrefix}ideaInterest`
 };

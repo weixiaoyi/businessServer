@@ -6,3 +6,4 @@ export { default as answerDbSchema } from "./fuye1000/answerDb";
 export { default as answerCommentSchema } from "./fuye1000/answerComment";
 export { default as ideaSchema } from "./fuye1000/idea";
 export { default as ideaCommentSchema } from "./fuye1000/ideaComment";
+export { default as ideaInterestSchema } from "./fuye1000/ideaInterest";

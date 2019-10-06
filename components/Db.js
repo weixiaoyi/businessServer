@@ -10,7 +10,8 @@ class Db {
     project,
     lookup,
     map,
-    sort
+    sort,
+    group
   }) => {
     if (!Model || !pagination) return console.error("handlePage参数错误");
     const res = await Model.aggregate(
@@ -59,6 +60,15 @@ class Db {
                       $lookup: lookup
                     }
                   ]
+              : []
+          )
+          .concat(
+            group
+              ? [
+                  {
+                    $group: group
+                  }
+                ]
               : []
           )
           .concat(

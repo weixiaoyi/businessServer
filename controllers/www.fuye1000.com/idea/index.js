@@ -48,23 +48,48 @@ class IdeaController extends Router {
         status: 400
       });
 
+    const { _id } = req.session.user;
     const result = await this.db
       .handlePage({
         Model: Idea,
         pagination: { page, pageSize },
         match: {
           ...(online ? { online } : {})
+          // ...(interest ? { "interests.accountId": this.db.ObjectId(_id) } : {})
         },
         sort: {
           createTime: -1
         },
-        lookup: {
-          from: ModelNames.ideaComment,
-          localField: "_id",
-          foreignField: "ideaId",
-          as: "popIdeaComment"
-        },
+        lookup: [
+          {
+            from: ModelNames.ideaComment,
+            localField: "_id",
+            foreignField: "ideaId",
+            as: "popIdeaComment"
+          },
+          {
+            from: ModelNames.ideaInterest,
+            localField: "_id",
+            foreignField: "ideaId",
+            as: "popIdeaInterest"
+          }
+        ],
         project: aggregate.project(this.ideaView, {
+          computedInterestNum: {
+            $size: "$popIdeaInterest"
+          },
+          computedIsInterest: {
+            $in: [
+              this.db.ObjectId(_id),
+              {
+                $map: {
+                  input: "$popIdeaInterest",
+                  as: "interest",
+                  in: "$$interest.accountId"
+                }
+              }
+            ]
+          },
           computedCommentsNum: {
             $size: {
               $filter: {
@@ -110,6 +135,7 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
+
     const data = await this.db
       .handleAggregate({
         Model: Idea,
