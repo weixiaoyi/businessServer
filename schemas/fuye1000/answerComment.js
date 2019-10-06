@@ -13,7 +13,13 @@ const answerCommentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  createTime: Date,
-  online: String
+  createTime: {
+    type: Date,
+    required: true
+  },
+  online: {
+    type: String,
+    required: true
+  }
 });
 export default answerCommentSchema;

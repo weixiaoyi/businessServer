@@ -8,6 +8,9 @@ const ideaInterestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
-  createTime: Date
+  createTime: {
+    type: Date,
+    required: true
+  }
 });
 export default ideaInterestSchema;

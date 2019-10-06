@@ -20,8 +20,13 @@ const answerDbSchema = new mongoose.Schema({
     trim: true
   },
   imageUrl: String,
-  online: String,
-  createTime: Date,
+  online: {
+    type: String
+  },
+  createTime: {
+    type: Date,
+    required: true
+  },
   other: String,
   member: {
     limit: Number, // 非会员能够看到的页码,

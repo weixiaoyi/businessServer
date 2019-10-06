@@ -7,7 +7,9 @@ class IdeaInterestController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaInterestView = "accountId createTime ideaId popIdea";
+    this.ideaInterestView = "accountId createTime ideaId";
+    this.ideaInterestPopIdeaView =
+      "popIdea.accountId popIdea.createTime  popIdea._id popIdea.title";
   }
 
   init = () => {
@@ -17,9 +19,9 @@ class IdeaInterestController extends Router {
     this.env = new Env();
     this.router.get("/getInterest", this.getInterest);
     this.router.post(
-      "/addInterest",
+      "/operationInterest",
       [this.authority.checkLogin],
-      this.addInterest
+      this.operationInterest
     );
   };
 
@@ -71,40 +73,49 @@ class IdeaInterestController extends Router {
             as: "popIdeaInterest"
           }
         ],
-        project: aggregate.project(this.ideaInterestView, {
-          computedInterestNum: {
-            $size: "$popIdeaInterest"
-          },
-          computedIsInterest: {
-            $in: [
-              this.db.ObjectId(_id),
-              {
-                $map: {
-                  input: "$popIdeaInterest",
-                  as: "interest",
-                  in: "$$interest.accountId"
+        project: aggregate.project(
+          `${this.ideaInterestView} ${this.ideaInterestPopIdeaView}`,
+          {
+            computedInterestNum: {
+              $size: "$popIdeaInterest"
+            },
+            computedIsInterest: {
+              $in: [
+                this.db.ObjectId(_id),
+                {
+                  $map: {
+                    input: "$popIdeaInterest",
+                    as: "interest",
+                    in: "$$interest.accountId"
+                  }
+                }
+              ]
+            },
+            computedCommentsNum: {
+              $size: {
+                $filter: {
+                  input: "$popIdeaComment",
+                  as: "item",
+                  cond: { $eq: ["$$item.online", "on"] }
                 }
               }
-            ]
-          },
-          computedCommentsNum: {
-            $size: {
-              $filter: {
-                input: "$popIdeaComment",
-                as: "item",
-                cond: { $eq: ["$$item.online", "on"] }
-              }
-            }
+            },
+            "popIdea.content": 1
           }
-        }),
+        ),
         map: item => {
+          const popIdea = item.popIdea[0] || {};
           return {
-            ...item
-            // brief: trimHtml(item.content, {
-            //   limit: 30,
-            //   preserveTags: false,
-            //   wordBreak: true
-            // }).html
+            ...item,
+            popIdea: {
+              ...popIdea,
+              content: undefined,
+              brief: trimHtml(popIdea.content, {
+                limit: 30,
+                preserveTags: false,
+                wordBreak: true
+              }).html
+            }
           };
         }
       })
@@ -120,12 +131,17 @@ class IdeaInterestController extends Router {
     });
   };
 
-  addInterest = async (req, res) => {
-    const { id } = req.body;
+  operationInterest = async (req, res) => {
+    const { ideaId, action } = req.body;
     const { _id } = req.session.user;
     const isValid = this.validator.validate(req.body, [
       {
-        field: "id",
+        field: "action",
+        type: "isIn",
+        payload: ["add", "delete"]
+      },
+      {
+        field: "ideaId",
         type: "isMongoId"
       }
     ]);
@@ -133,12 +149,18 @@ class IdeaInterestController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const newInterest = new IdeaInterest({
-      accountId: _id,
-      ideaId: id,
-      createTime: Date.now()
-    });
-    const result = await newInterest.save().catch(this.handleSqlError);
+    let result;
+    if (action === "add") {
+      result = await IdeaInterest.findOneAndUpdate(
+        { ideaId },
+        { accountId: _id, ideaId, createTime: Date.now() },
+        { new: true, upsert: true }
+      ).catch(this.handleSqlError);
+    } else if (action === "delete") {
+      result = await IdeaInterest.findOneAndRemove({ ideaId }).catch(
+        this.handleSqlError
+      );
+    }
     if (!result) return this.fail(res);
     return this.success(res, {
       data: result

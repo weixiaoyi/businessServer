@@ -8,7 +8,9 @@ class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaView = "accountId title content createTime popUser.name online";
+    this.ideaPreviewView = "accountId title createTime online";
+    this.ideaDetailView =
+      "accountId title content createTime popUser.name online";
   }
 
   init = () => {
@@ -55,7 +57,6 @@ class IdeaController extends Router {
         pagination: { page, pageSize },
         match: {
           ...(online ? { online } : {})
-          // ...(interest ? { "interests.accountId": this.db.ObjectId(_id) } : {})
         },
         sort: {
           createTime: -1
@@ -74,7 +75,7 @@ class IdeaController extends Router {
             as: "popIdeaInterest"
           }
         ],
-        project: aggregate.project(this.ideaView, {
+        project: aggregate.project(this.ideaPreviewView, {
           computedInterestNum: {
             $size: "$popIdeaInterest"
           },
@@ -98,11 +99,13 @@ class IdeaController extends Router {
                 cond: { $eq: ["$$item.online", "on"] }
               }
             }
-          }
+          },
+          content: 1
         }),
         map: item => {
           return {
             ...item,
+            content: undefined,
             brief: trimHtml(item.content, {
               limit: 30,
               preserveTags: false,
@@ -148,7 +151,7 @@ class IdeaController extends Router {
           foreignField: "_id",
           as: "popUser"
         },
-        project: this.ideaView,
+        project: this.ideaDetailView,
         map: item => {
           return {
             ...item,

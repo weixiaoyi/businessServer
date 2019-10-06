@@ -12,7 +12,13 @@ const ideaSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  createTime: Date,
-  online: String
+  createTime: {
+    type: Date,
+    required: true
+  },
+  online: {
+    type: String,
+    required: true
+  }
 });
 export default ideaSchema;
