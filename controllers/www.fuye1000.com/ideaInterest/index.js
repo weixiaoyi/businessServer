@@ -10,6 +10,7 @@ class IdeaInterestController extends Router {
     this.ideaInterestView = "accountId createTime ideaId";
     this.ideaInterestPopIdeaView =
       "popIdea.accountId popIdea.createTime  popIdea._id popIdea.title";
+    this.interestnerPopView = "popUser.name popUser._id";
   }
 
   init = () => {
@@ -22,6 +23,7 @@ class IdeaInterestController extends Router {
       [this.authority.checkLogin],
       this.getInterest
     );
+    this.router.get("/getIdeaInterester", this.getIdeaInterester);
     this.router.post(
       "/operationInterest",
       [this.authority.checkLogin],
@@ -120,6 +122,66 @@ class IdeaInterestController extends Router {
                 wordBreak: true
               }).html
             }
+          };
+        }
+      })
+      .catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result.data,
+      pagination: {
+        page,
+        pageSize,
+        total: result.total
+      }
+    });
+  };
+
+  getIdeaInterester = async (req, res) => {
+    const { page, pageSize, ideaId } = req.query;
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      },
+      {
+        field: "ideaId",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await this.db
+      .handlePage({
+        Model: IdeaInterest,
+        pagination: { page, pageSize },
+        match: {
+          ideaId: this.db.ObjectId(ideaId)
+        },
+        sort: {
+          createTime: -1
+        },
+        lookup: [
+          {
+            from: ModelNames.user,
+            localField: "accountId",
+            foreignField: "_id",
+            as: "popUser"
+          }
+        ],
+        project: aggregate.project(
+          `${this.ideaInterestView} ${this.interestnerPopView}`
+        ),
+        map: item => {
+          return {
+            ...item,
+            popUser: item.popUser[0]
           };
         }
       })
