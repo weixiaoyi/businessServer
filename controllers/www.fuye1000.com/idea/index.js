@@ -10,7 +10,7 @@ class IdeaController extends Router {
     this.init();
     this.ideaPreviewView = "accountId title createTime online";
     this.ideaDetailView =
-      "accountId title content createTime popUser.name online";
+      "accountId title content createTime popUser._id popUser.name online";
   }
 
   init = () => {

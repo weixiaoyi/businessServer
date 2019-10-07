@@ -6,7 +6,7 @@ class AnswerCommentController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.commentView = "answerId accountId comment popUser.name";
+    this.commentView = "answerId accountId comment popUser._id popUser.name";
   }
 
   init = () => {

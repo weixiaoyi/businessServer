@@ -21,7 +21,8 @@ const answerDbSchema = new mongoose.Schema({
   },
   imageUrl: String,
   online: {
-    type: String
+    type: String,
+    required: true
   },
   createTime: {
     type: Date,
@@ -29,8 +30,14 @@ const answerDbSchema = new mongoose.Schema({
   },
   other: String,
   member: {
-    limit: Number, // 非会员能够看到的页码,
-    price: Number // 会员价格
+    limit: {
+      type: Number,
+      required: true
+    }, // 非会员能够看到的页码,
+    price: {
+      type: Number,
+      required: true
+    } // 会员价格
   }
 });
 export default answerDbSchema;

@@ -7,7 +7,7 @@ class IdeaCommentController extends Router {
     super(props);
     this.init();
     this.commentView =
-      "answerId accountId toAccountId ideaId comment createTime popUser._id popUser.name popToUser._id popToUser.name online";
+      "answerId accountId toAccountId ideaId comment createTime online popUser._id popUser.name popToUser._id popToUser.name";
   }
 
   init = () => {
@@ -57,7 +57,9 @@ class IdeaCommentController extends Router {
           ideaId: this.db.ObjectId(ideaId),
           ...(online ? { online } : {})
         },
-        project: this.commentView,
+        sort: {
+          createTime: -1
+        },
         lookup: [
           {
             from: ModelNames.user,
@@ -72,9 +74,7 @@ class IdeaCommentController extends Router {
             as: "popToUser"
           }
         ],
-        sort: {
-          createTime: -1
-        },
+        project: this.commentView,
         map: item => {
           return {
             ...item,
