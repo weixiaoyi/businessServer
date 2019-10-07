@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema({
   avatar: String,
   address: String,
   createTime: Date,
-  updateTime: Date,
   decrypt: {
     type: String,
     required: true,

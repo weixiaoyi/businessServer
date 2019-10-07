@@ -110,7 +110,7 @@ class UserController extends Router {
     if (!updatedUser) {
       return this.fail(res);
     }
-    req.session.user = updatedUser;
+    req.session.user = this.setSessionUser(updatedUser);
     return this.sendUser(req, res, updatedUser);
   };
 
@@ -175,7 +175,7 @@ class UserController extends Router {
           msg: "账户创建失败"
         });
     }
-    req.session.user = resultUser;
+    req.session.user = this.setSessionUser(resultUser);
     return this.sendUser(req, res, resultUser);
   };
 
@@ -239,6 +239,15 @@ class UserController extends Router {
       };
     }
     return this.loginOrRegisterMode(req, res, user, "ifNotRegisterThenLogin");
+  };
+
+  setSessionUser = user => {
+    return {
+      _id: user._id,
+      name: user.name,
+      ...(user.phone ? { phone: user.phone } : {}),
+      ...(user.email ? { email: user.email } : {})
+    };
   };
 }
 
