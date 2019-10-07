@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import { User } from "../../models";
-import { Router, Authority } from "../../components";
+import { Router, Authority, Validator } from "../../components";
 import { splitQueryString, decryptString, RegExp } from "../../utils";
 import _ from "lodash";
-import { OAUTH } from "../../constants";
+import { OAUTH, Domain } from "../../constants";
 
 class UserController extends Router {
   constructor(props) {
@@ -13,6 +13,7 @@ class UserController extends Router {
 
   init = () => {
     this.authority = new Authority();
+    this.validator = new Validator();
     this.router.post("/login", this.login);
     this.router.post("/register", this.register);
     this.router.post("/loginThird", this.loginThird);
@@ -41,37 +42,13 @@ class UserController extends Router {
     });
   };
 
-  login = async (req, res) => {
-    const { domain, name, password, ...rest } = req.body;
-    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
-      return this.fail(res, {
-        msg: "Bad Request",
-        status: 400
-      });
-    }
-    const user = { domain, name, password, ...rest };
-    return this.loginOrRegisterMode(req, res, user, "login");
-  };
-
-  register = async (req, res) => {
-    const { domain, name, password, ...rest } = req.body;
-    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
-      return this.fail(res, {
-        msg: "Bad Request",
-        status: 400
-      });
-    }
-    const user = { domain, name, password, ...rest };
-    return this.loginOrRegisterMode(req, res, user, "register");
-  };
-
-  loginThird = async (req, res) => {
-    const { platform, ...rest } = req.body;
-    if (platform === "WechatApplet") {
-      // 微信小程序
-      const { code } = rest;
-      console.log(code);
-    }
+  setSessionUser = user => {
+    return {
+      _id: user._id,
+      name: user.name,
+      ...(user.phone ? { phone: user.phone } : {}),
+      ...(user.email ? { email: user.email } : {})
+    };
   };
 
   getUserInfo = async (req, res) => {
@@ -112,6 +89,39 @@ class UserController extends Router {
     }
     req.session.user = this.setSessionUser(updatedUser);
     return this.sendUser(req, res, updatedUser);
+  };
+
+  login = async (req, res) => {
+    const { domain, name, password, ...rest } = req.body;
+    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
+      return this.fail(res, {
+        msg: "Bad Request",
+        status: 400
+      });
+    }
+    const user = { domain, name, password, ...rest };
+    return this.loginOrRegisterMode(req, res, user, "login");
+  };
+
+  register = async (req, res) => {
+    const { domain, name, password, ...rest } = req.body;
+    if (!this.checkNameAndPasswordFormat(domain, name, password)) {
+      return this.fail(res, {
+        msg: "Bad Request",
+        status: 400
+      });
+    }
+    const user = { domain, name, password, ...rest };
+    return this.loginOrRegisterMode(req, res, user, "register");
+  };
+
+  loginThird = async (req, res) => {
+    const { platform, ...rest } = req.body;
+    if (platform === "WechatApplet") {
+      // 微信小程序
+      const { code } = rest;
+      console.log(code);
+    }
   };
 
   loginOrRegisterMode = async (req, res, user, mode) => {
@@ -188,9 +198,28 @@ class UserController extends Router {
   };
 
   checkNameAndPasswordFormat = (domain, name, password) => {
-    if (!(domain && name && password)) return false;
+    const isValid = this.validator.validate(undefined, [
+      {
+        value: domain,
+        type: "isIn",
+        payload: [Domain.fuye.value]
+      },
+      {
+        value: name,
+        transform: String,
+        type: "isLength",
+        payload: {
+          min: undefined,
+          max: 20
+        }
+      },
+      {
+        value: password,
+        type: "required"
+      }
+    ]);
+    if (!isValid) return false;
     password = decryptString(password);
-    if (name.length > 20) return false;
     return !(password.length < 6 || password.length > 20);
   };
 
@@ -239,15 +268,6 @@ class UserController extends Router {
       };
     }
     return this.loginOrRegisterMode(req, res, user, "ifNotRegisterThenLogin");
-  };
-
-  setSessionUser = user => {
-    return {
-      _id: user._id,
-      name: user.name,
-      ...(user.phone ? { phone: user.phone } : {}),
-      ...(user.email ? { email: user.email } : {})
-    };
   };
 }
 

@@ -11,13 +11,13 @@ class DecryptController extends Router {
     this.router.all(
       "*",
       (req, res, next) => {
-        if (req.path === "/pay/notify") next("route");
+        if (req.path === "/pay/notify" || req.path === "/pay/testNotify")
+          next("route");
         else next();
       },
       (req, res, next) => {
         try {
-          const mnemonic = checkDecrypt(req.headers.authorization);
-          req.decrypt = mnemonic;
+          req.decrypt = checkDecrypt(req.headers.authorization);
           req.headers.signature && checkDecrypt(req.headers.signature);
           next();
         } catch (e) {

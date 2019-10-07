@@ -1,5 +1,3 @@
-const fuyePrefix = "fuye-";
-
 export const OAUTH = {
   github: {
     client_id: "10ba2762cbfe233a3880",
@@ -7,12 +5,21 @@ export const OAUTH = {
   }
 };
 
+export const Domain = {
+  fuye: {
+    value: "fuye",
+    prefix: "fuye-"
+  }
+};
+
 export const ModelNames = {
   user: "user",
-  answer: `${fuyePrefix}answer`,
-  answerComment: `${fuyePrefix}answerComment`,
-  answerDb: `${fuyePrefix}answerDb`,
-  idea: `${fuyePrefix}idea`,
-  ideaComment: `${fuyePrefix}ideaComment`,
-  ideaInterest: `${fuyePrefix}ideaInterest`
+  member: "member",
+  //-------------fuye1000.com
+  answer: `${Domain.fuye.prefix}answer`,
+  answerComment: `${Domain.fuye.prefix}answerComment`,
+  answerDb: `${Domain.fuye.prefix}answerDb`,
+  idea: `${Domain.fuye.prefix}idea`,
+  ideaComment: `${Domain.fuye.prefix}ideaComment`,
+  ideaInterest: `${Domain.fuye.prefix}ideaInterest`
 };

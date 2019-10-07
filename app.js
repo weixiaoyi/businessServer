@@ -8,6 +8,7 @@ const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const controllers = require("./controllers");
 mongoose.connect(process.env.MONGODB_URL, {
+  autoIndex: false,
   useNewUrlParser: true,
   bufferMaxEntries: 0,
   poolSize: 10,
@@ -15,15 +16,14 @@ mongoose.connect(process.env.MONGODB_URL, {
   socketTimeoutMS: 45000,
   reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
   reconnectInterval: 500, // Reconnect every 500ms
-  family: 4
+  family: 4,
+  keepAlive: 120
 });
 mongoose.set("useCreateIndex", true); //加上这个
 mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "数据库链接失败"));
-db.once("open", () => {
-  console.warn.bind(console, "数据库链接成功");
-});
+db.on("error", () => console.warn("数据库链接失败"));
+db.once("open", () => console.log("数据库链接成功"));
 
 const app = express();
 

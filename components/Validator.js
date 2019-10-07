@@ -16,6 +16,9 @@ class Validator {
         }
         value = paramsPayload[[item.field]];
       } else {
+        if (_.isFunction(item.transform)) {
+          item.value = item.transform(item.value);
+        }
         value = item.value;
       }
 

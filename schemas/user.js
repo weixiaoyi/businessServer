@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  password: String,
+  password: {
+    type: String
+  },
   domain: {
     type: String,
     required: true
@@ -16,13 +18,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   }, // pc,apple,linux,微信小程序，app
-  phone: String,
-  email: String,
+  phone: {
+    type: String,
+    trim: true
+  },
+  email: {
+    type: String,
+    trim: true
+  },
   age: Number,
   sex: Number,
   avatar: String,
   address: String,
-  createTime: Date,
+  createTime: {
+    type: Date,
+    required: true
+  },
   decrypt: {
     type: String,
     required: true,
