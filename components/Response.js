@@ -1,5 +1,8 @@
 class Response {
-  success = (res, { data, code = 1, msg = "success", pagination } = {}) => {
+  success = (
+    res,
+    { data, code = 1, msg = "success", pagination, requiredInfo } = {}
+  ) => {
     if (!res) console.error("res不存在");
     return res.json({
       ...(data ? { data } : {}),
@@ -11,7 +14,8 @@ class Response {
             pageSize: Number(pagination.pageSize),
             total: Number(pagination.total)
           }
-        : {})
+        : {}),
+      ...(requiredInfo ? { requiredInfo } : {})
     });
   };
 

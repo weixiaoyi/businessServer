@@ -2,7 +2,6 @@ import fetch from "node-fetch";
 import { Router, Authority, Validator } from "../../components";
 import { signature } from "./pay";
 import { Member } from "../../models";
-import { Domain } from "../../constants";
 
 class PayController extends Router {
   constructor(props) {
@@ -18,7 +17,7 @@ class PayController extends Router {
       [this.authority.checkLogin],
       this.getPayImageUrl
     );
-    this.router.get("/testNotify", this.testNotify);
+    this.router.post("/testNotify", this.testNotify);
     this.router.post("/notify", this.notify);
   };
 
@@ -35,24 +34,19 @@ class PayController extends Router {
       transaction_id: "4200000357201908182662350239",
       sign: "213AC3BD467175689B3D40858E89C59D"
     };*/
-    const { attach, ...rest } = req.query;
-    const isValidAttach = this.validator.validate(req.query, [
+    const { attach, ...rest } = req.body;
+    const isValidAttach = this.validator.validate(req.body, [
       {
         field: "attach",
         type: "isJSON"
       }
     ]);
     if (!isValidAttach) return this.fail(res);
-    const { accountId, domain, field } = JSON.parse(attach);
+    const { accountId, field } = JSON.parse(attach);
     const isValidParseAttach = this.validator.validate(undefined, [
       {
         value: accountId,
         type: "isMongoId"
-      },
-      {
-        value: domain,
-        type: "isIn",
-        payload: [Domain.fuye.value]
       },
       {
         value: field,
@@ -61,10 +55,9 @@ class PayController extends Router {
     ]);
     if (!isValidParseAttach) return this.fail(res);
     await Member.findOneAndUpdate(
-      { accountId, domain },
+      { accountId },
       {
         accountId,
-        domain,
         $set: {
           [`detail.${field}`]: {
             createTime: Date.now(),

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { aggregate } from "../utils";
 
 class Db {
+  // 分页聚合
   handlePage = async ({
     Model,
     match,
@@ -92,6 +93,7 @@ class Db {
     };
   };
 
+  // 普通聚合
   handleAggregate = async ({ Model, match, project, lookup, map, sort }) => {
     if (!Model) return console.error("handleAggregate参数错误");
     const data = await Model.aggregate(
@@ -107,11 +109,13 @@ class Db {
         )
         .concat(
           lookup
-            ? [
-                {
-                  $lookup: lookup
-                }
-              ]
+            ? _.isArray(lookup)
+              ? lookup.map(item => ({ $lookup: item }))
+              : [
+                  {
+                    $lookup: lookup
+                  }
+                ]
             : []
         )
         .concat(

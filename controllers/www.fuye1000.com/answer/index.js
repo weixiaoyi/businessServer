@@ -1,5 +1,7 @@
+import _ from "lodash";
 import { Router, Authority, Db, Validator, Env } from "../../../components";
-import { Answer } from "../../../models";
+import { Answer, AnswerDb, Member } from "../../../models";
+import { trimHtml } from "../../../utils";
 
 class AnswerController extends Router {
   constructor(props) {
@@ -49,6 +51,7 @@ class AnswerController extends Router {
   };
 
   getAnswers = async (req, res) => {
+    let hasMemberAuthority = false;
     const { page, pageSize, dbName, online } = req.query;
     const isValid = this.validator.validate(req.query, [
       {
@@ -80,6 +83,25 @@ class AnswerController extends Router {
         status: 400
       });
 
+    const dbInfo = await AnswerDb.findOne({
+      name: dbName,
+      ...(online ? { online } : {})
+    }).catch(this.handleSqlError);
+    if (!dbInfo) return this.fail(res);
+
+    const dbInfoLimit = _.get(dbInfo, "member.limit");
+    if (dbInfoLimit && page <= dbInfoLimit) {
+      hasMemberAuthority = true;
+    } else if (req.session.user) {
+      const { _id } = req.session.user;
+      const memberInfo = await Member.findOne({
+        accountId: _id
+      }).catch(this.handleSqlError);
+      hasMemberAuthority =
+        _.get(memberInfo, `detail.all.status`) ||
+        _.get(memberInfo, `detail.${dbName.replace(".json", "")}.status`);
+    }
+
     const result = await this.db
       .handlePage({
         Model: Answer,
@@ -93,12 +115,24 @@ class AnswerController extends Router {
       .catch(this.handleSqlError);
 
     if (!result) return this.fail(res);
+
     return this.success(res, {
-      data: result.data,
+      data: result.data.map(item => ({
+        ...item,
+        content: hasMemberAuthority
+          ? item.content
+          : trimHtml(item.content, {
+              limit: 30,
+              wordBreak: true
+            }).html
+      })),
       pagination: {
         page,
         pageSize,
         total: result.total
+      },
+      requiredInfo: {
+        hasMemberAuthority
       }
     });
   };
