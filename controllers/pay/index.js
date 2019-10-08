@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { Router, Authority, Validator } from "../../components";
 import { signature } from "./pay";
-import { Member } from "../../models";
+import { Member, AnswerDb } from "../../models";
 
 class PayController extends Router {
   constructor(props) {
@@ -34,6 +34,7 @@ class PayController extends Router {
       transaction_id: "4200000357201908182662350239",
       sign: "213AC3BD467175689B3D40858E89C59D"
     };*/
+    console.log(req.body, "----req.body");
     const { attach, ...rest } = req.body;
     const isValidAttach = this.validator.validate(req.body, [
       {
@@ -101,22 +102,51 @@ class PayController extends Router {
 
   getPayImageUrl = async (req, res) => {
     const { user } = req.session;
-    const { host } = user;
+    const { domain } = user;
     let fee = "";
-    if (user.accountId === "18353268994" || user.accountId === "test") {
-      fee = 1;
-    } else if (host === "yijianxiazai.com") {
+    let attach = "";
+    let body = "会员 ";
+    if (domain === "yijianxiazai.com") {
       fee = 2000;
+    } else if (domain === "fuye") {
+      const { dbName } = req.query;
+      const isValid = this.validator.validate(req.query, [
+        {
+          field: "dbName",
+          type: "required"
+        }
+      ]);
+      if (!isValid) return this.fail(res);
+
+      if (user.name === "18353268994" || user.name === "test") {
+        body = "1000fuye.com 测试会员";
+        fee = 1;
+      } else if (dbName === "all") {
+        body = "1000fuye.com 一站通会员";
+        fee = 149 * 100;
+      } else {
+        body = "1000fuye.com 教程会员";
+        const answerDbInfo = await AnswerDb.findOne({ name: dbName }).catch(
+          this.handleSqlError
+        );
+        if (!answerDbInfo) return this.fail(res);
+        fee = answerDbInfo.member.price * 100;
+      }
+      attach = JSON.stringify({
+        accountId: user._id,
+        field: dbName.replace(".json", "")
+      });
     } else {
-      fee = 5000;
+      return this.fail(res);
     }
+
     const params = {
       mchid: "1549111861",
       total_fee: fee,
-      attach: user.accountId,
-      body: "充值会员",
+      attach,
+      body,
       out_trade_no: "no",
-      notify_url: "https://www.yijianxiazai.com/api/pay/notify"
+      notify_url: "https://1000fuye.com/api/pay/testNotify"
     };
     const signUrl = signature(params);
     const result = await fetch("https://payjs.cn/api/native", {
@@ -131,6 +161,7 @@ class PayController extends Router {
     if (result && result.sign) {
       return this.success(res, {
         data: {
+          code_url: result.code_url,
           orderId: result.payjs_order_id,
           qrCode: result.qrcode
         }

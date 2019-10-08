@@ -46,6 +46,7 @@ class UserController extends Router {
     return {
       _id: user._id,
       name: user.name,
+      domain: user.domain, //用户购买会员判断domain
       ...(user.phone ? { phone: user.phone } : {}),
       ...(user.email ? { email: user.email } : {})
     };
