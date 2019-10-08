@@ -1,5 +1,6 @@
 require("@babel/register");
 const express = require("express");
+const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const methodOverride = require("method-override");
@@ -28,6 +29,7 @@ db.once("open", () => console.log("数据库链接成功"));
 const app = express();
 
 app.use(logger("dev"));
+app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
