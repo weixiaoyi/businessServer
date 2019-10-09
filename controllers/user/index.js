@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { User } from "../../models";
+import { User, Member } from "../../models";
 import { Router, Authority, Validator } from "../../components";
 import { splitQueryString, decryptString, RegExp } from "../../utils";
 import _ from "lodash";
@@ -21,6 +21,11 @@ class UserController extends Router {
       "/getUserInfo",
       [this.authority.checkLogin],
       this.getUserInfo
+    );
+    this.router.get(
+      "/getUserMemberInfo",
+      [this.authority.checkLogin],
+      this.getUserMemberInfo
     );
     this.router.get("/loginOut", this.loginOut);
     this.router.post(
@@ -62,6 +67,14 @@ class UserController extends Router {
       });
     }
     return this.sendUser(req, res, findUser);
+  };
+
+  getUserMemberInfo = async (req, res) => {
+    const { _id } = req.session.user;
+    const findMember = await Member.findOne({ accountId: _id }).catch(
+      this.handleSqlError
+    );
+    return this.success(res, { data: findMember });
   };
 
   updateUserInfo = async (req, res) => {
