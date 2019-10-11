@@ -1,5 +1,6 @@
 import { Router, Authority, Validator, Env, Db } from "../../../components";
 import { AnswerDb } from "../../../models";
+import { Domain } from "../../../constants";
 
 class AnswerDbController extends Router {
   constructor(props) {
@@ -66,7 +67,15 @@ class AnswerDbController extends Router {
       .catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
-      data: result.data,
+      data: result.data.concat({
+        _id: Date.now(),
+        name: "all.json",
+        title: "all",
+        member: {
+          limit: 1,
+          price: Domain.fuye.memberAllPrice
+        }
+      }),
       pagination: {
         page,
         pageSize,

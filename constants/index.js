@@ -8,7 +8,8 @@ export const OAUTH = {
 export const Domain = {
   fuye: {
     value: "fuye",
-    prefix: "fuye-"
+    prefix: "fuye-",
+    memberAllPrice: 150
   }
 };
 

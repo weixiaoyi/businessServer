@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { Router, Authority, Validator } from "../../components";
 import { signature } from "./pay";
 import { Member, AnswerDb } from "../../models";
+import { Domain } from "../../constants";
 
 class PayController extends Router {
   constructor(props) {
@@ -123,7 +124,7 @@ class PayController extends Router {
         fee = 1;
       } else if (dbName === "all") {
         body = "1000fuye.com 一站通会员";
-        fee = 149 * 100;
+        fee = Domain.fuye.memberAllPrice * 100;
       } else {
         body = "1000fuye.com 教程会员";
         const answerDbInfo = await AnswerDb.findOne({ name: dbName }).catch(
