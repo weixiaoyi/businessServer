@@ -15,12 +15,16 @@ export const Domain = {
 
 export const ModelNames = {
   user: "user",
+  userBlackList: "userBlackList",
   member: "member",
   //-------------fuye1000.com
-  answer: `${Domain.fuye.prefix}answer`,
-  answerComment: `${Domain.fuye.prefix}answerComment`,
-  answerDb: `${Domain.fuye.prefix}answerDb`,
-  idea: `${Domain.fuye.prefix}idea`,
-  ideaComment: `${Domain.fuye.prefix}ideaComment`,
-  ideaInterest: `${Domain.fuye.prefix}ideaInterest`
+
+  fuye: {
+    answer: `${Domain.fuye.prefix}answer`,
+    answerComment: `${Domain.fuye.prefix}answerComment`,
+    answerDb: `${Domain.fuye.prefix}answerDb`,
+    idea: `${Domain.fuye.prefix}idea`,
+    ideaComment: `${Domain.fuye.prefix}ideaComment`,
+    ideaInterest: `${Domain.fuye.prefix}ideaInterest`
+  }
 };

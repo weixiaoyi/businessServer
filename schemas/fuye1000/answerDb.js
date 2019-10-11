@@ -3,7 +3,8 @@ const answerDbSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     desc: {
       type: String,
@@ -23,7 +24,8 @@ const answerDbSchema = new mongoose.Schema(
     imageUrl: String,
     online: {
       type: String,
-      required: true
+      required: true,
+      enum: ["on", "off"]
     },
     createTime: {
       type: Date,

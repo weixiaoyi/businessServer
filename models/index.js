@@ -1,4 +1,5 @@
 export { default as User } from "./user";
+export { default as UserBlackList } from "./userBlackList";
 export { default as Member } from "./member";
 export { default as WebsiteInfo } from "./websiteInfo";
 export { default as UserNav } from "./yijianxiazai/userNav";

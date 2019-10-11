@@ -3,9 +3,9 @@ import { ideaInterestSchema } from "../../schemas";
 import { ModelNames } from "../../constants";
 
 const IdeaInterest = mongoose.model(
-  ModelNames.ideaInterest,
+  ModelNames.fuye.ideaInterest,
   ideaInterestSchema,
-  ModelNames.ideaInterest
+  ModelNames.fuye.ideaInterest
 );
 
 export default IdeaInterest;

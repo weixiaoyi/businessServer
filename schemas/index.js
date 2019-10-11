@@ -1,4 +1,5 @@
 export { default as userSchema } from "./user";
+export { default as userBlackListSchema } from "./userBlackList";
 export { default as memberSchema } from "./member";
 export { default as websiteInfoSchema } from "./websiteInfo";
 export { default as userNavSchema } from "./yijianxiazai/userNav";

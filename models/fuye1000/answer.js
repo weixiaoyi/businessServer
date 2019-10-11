@@ -3,9 +3,9 @@ import { answerSchema } from "../../schemas";
 import { ModelNames } from "../../constants";
 
 const Answer = mongoose.model(
-  ModelNames.answer,
+  ModelNames.fuye.answer,
   answerSchema,
-  ModelNames.answer
+  ModelNames.fuye.answer
 );
 
 export default Answer;

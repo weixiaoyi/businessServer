@@ -61,19 +61,19 @@ class IdeaInterestController extends Router {
         },
         lookup: [
           {
-            from: ModelNames.idea,
+            from: ModelNames.fuye.idea,
             localField: "ideaId",
             foreignField: "_id",
             as: "popIdea"
           },
           {
-            from: ModelNames.ideaComment,
+            from: ModelNames.fuye.ideaComment,
             localField: "ideaId",
             foreignField: "ideaId",
             as: "popIdeaComment"
           },
           {
-            from: ModelNames.ideaInterest, // 注意这里自己lookup自己，是可以的
+            from: ModelNames.fuye.ideaInterest, // 注意这里自己lookup自己，是可以的
             localField: "ideaId",
             foreignField: "ideaId",
             as: "popIdeaInterest"

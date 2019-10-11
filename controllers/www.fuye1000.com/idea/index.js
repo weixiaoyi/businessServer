@@ -74,13 +74,13 @@ class IdeaController extends Router {
         },
         lookup: [
           {
-            from: ModelNames.ideaComment,
+            from: ModelNames.fuye.ideaComment,
             localField: "_id",
             foreignField: "ideaId",
             as: "popIdeaComment"
           },
           {
-            from: ModelNames.ideaInterest,
+            from: ModelNames.fuye.ideaInterest,
             localField: "_id",
             foreignField: "ideaId",
             as: "popIdeaInterest"

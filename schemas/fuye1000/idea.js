@@ -19,7 +19,8 @@ const ideaSchema = new mongoose.Schema(
     },
     online: {
       type: String,
-      required: true
+      required: true,
+      enum: ["on", "off"]
     }
   },
   { versionKey: false }

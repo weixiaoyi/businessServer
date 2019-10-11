@@ -3,9 +3,9 @@ import { answerDbSchema } from "../../schemas";
 import { ModelNames } from "../../constants";
 
 const AnswerDb = mongoose.model(
-  ModelNames.answerDb,
+  ModelNames.fuye.answerDb,
   answerDbSchema,
-  ModelNames.answerDb
+  ModelNames.fuye.answerDb
 );
 
 export default AnswerDb;

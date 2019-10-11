@@ -6,17 +6,30 @@ const answerSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
-    title: String,
+    title: {
+      type: String,
+      required: true
+    },
     questionId: String,
     authorName: String,
     authorId: String,
-    content: String,
+    content: {
+      type: String,
+      required: true
+    },
     prevUpVoteNum: String,
     currentUpVoteNum: { type: Number, default: 1 },
-    online: String,
+    online: {
+      type: String,
+      required: true,
+      enum: ["on", "off"]
+    },
+    dbName: {
+      type: String,
+      required: true
+    },
     createTime: Date,
     updateTime: Date,
-    dbName: String,
     other: String
   },
   { versionKey: false }
