@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const methodOverride = require("method-override");
+const cors = require("cors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
@@ -27,6 +28,13 @@ db.on("error", () => console.warn("数据库链接失败"));
 db.once("open", () => console.log("数据库链接成功"));
 
 const app = express();
+app.use(
+  cors({
+    origin: "*", //指定接收的地址
+    methods: ["PUT", "GET", "POST", "DELETE", "OPTIONS"], //指定接收的请求类型
+    credentials: true
+  })
+);
 
 app.use(logger("dev"));
 app.use(helmet());
