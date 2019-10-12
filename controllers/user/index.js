@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { User, Member } from "../../models";
-import { Router, Authority, Validator } from "../../components";
+import { Router, Authority, Validator, Db } from "../../components";
 import { splitQueryString, decryptString, RegExp } from "../../utils";
 import _ from "lodash";
 import { OAUTH, Domain } from "../../constants";
@@ -14,6 +14,7 @@ class UserController extends Router {
   init = () => {
     this.authority = new Authority();
     this.validator = new Validator();
+    this.db = new Db();
     this.router.post("/login", this.login);
     this.router.post("/register", this.register);
     this.router.post("/loginThird", this.loginThird);
@@ -27,6 +28,7 @@ class UserController extends Router {
       [this.authority.checkLogin],
       this.getUserMemberInfo
     );
+    this.router.get("/getUsers", [this.authority.checkAdmin], this.getUsers);
     this.router.get("/loginOut", this.loginOut);
     this.router.post(
       "/updateUserInfo",
@@ -75,6 +77,48 @@ class UserController extends Router {
       this.handleSqlError
     );
     return this.success(res, { data: findMember });
+  };
+
+  getUsers = async (req, res) => {
+    const { page, pageSize } = req.query;
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+
+    const result = await this.db
+      .handlePage({
+        Model: User,
+        pagination: { page, pageSize },
+        project: {
+          password: 0
+        }
+      })
+      .catch(this.handleSqlError);
+
+    if (!result) return this.fail(res);
+
+    return this.success(res, {
+      data: result.data.map(item => ({
+        ...item
+      })),
+      pagination: {
+        page,
+        pageSize,
+        total: result.total
+      },
+      requiredInfo: {}
+    });
   };
 
   updateUserInfo = async (req, res) => {

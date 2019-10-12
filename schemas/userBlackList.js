@@ -11,12 +11,9 @@ const userBlackListSchema = new mongoose.Schema(
       required: true,
       enum: ["normal", "inspecting", "forbidden"]
     },
-    createTime: {
+    updateTime: {
       type: Date,
       required: true
-    },
-    updateTime: {
-      type: Date
     },
     why: {
       type: String

@@ -1,6 +1,5 @@
-import { User, Member, IdeaInterest } from "../../models";
+import { UserBlackList } from "../../models";
 import { Router, Authority, Validator } from "../../components";
-import _ from "lodash";
 
 class UserBlackListController extends Router {
   constructor(props) {
@@ -19,15 +18,15 @@ class UserBlackListController extends Router {
   };
 
   operationUserBlackList = async (req, res) => {
-    const { accountId, type, why, action } = req.body;
+    const { accountId, type } = req.body;
     const isValid = this.validator.validate(req.body, [
       {
-        field: "action",
+        field: "type",
         type: "isIn",
-        payload: ["add", "delete"]
+        payload: ["normal", "inspecting", "forbidden"]
       },
       {
-        field: "ideaId",
+        field: "accountId",
         type: "isMongoId"
       }
     ]);
@@ -37,19 +36,36 @@ class UserBlackListController extends Router {
       });
     let result;
     const findLimit = {
-      ideaId,
-      accountId: _id
+      accountId
     };
-    if (action === "add") {
-      result = await IdeaInterest.findOneAndUpdate(
+    if (type === "inspecting") {
+      result = await UserBlackList.findOneAndUpdate(
         findLimit,
-        { accountId: _id, ideaId, createTime: Date.now() },
+        { accountId, updateTime: Date.now(), $inc: { inspectTimes: 1 }, type },
         { new: true, upsert: true }
       ).catch(this.handleSqlError);
-    } else if (action === "delete") {
-      result = await IdeaInterest.findOneAndRemove(findLimit).catch(
-        this.handleSqlError
-      );
+    } else if (type === "forbidden") {
+      result = await UserBlackList.findOneAndUpdate(
+        findLimit,
+        {
+          accountId,
+          updateTime: Date.now(),
+          $inc: { forbiddenTimes: 1 },
+          type
+        },
+        { new: true, upsert: true }
+      ).catch(this.handleSqlError);
+    } else if (type === "normal") {
+      result = await UserBlackList.findOneAndUpdate(
+        findLimit,
+        {
+          accountId,
+          updateTime: Date.now(),
+          $inc: { normalTimes: 1 },
+          type
+        },
+        { new: true }
+      ).catch(this.handleSqlError);
     }
     if (!result) return this.fail(res);
     return this.success(res, {

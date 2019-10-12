@@ -6,7 +6,7 @@ class AnswerDbController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.answerDbView = "createTime intro member name title online";
+    this.answerDbView = "createTime intro member name desc title online";
   }
 
   init = () => {
@@ -85,8 +85,8 @@ class AnswerDbController extends Router {
   };
 
   onlineAnswerDb = async (req, res) => {
-    const { name, title, intro, member } = req.body;
-    if (!name || !title || !intro || !member)
+    const { name, desc, title, intro, member } = req.body;
+    if (!name || !desc || !title || !intro || !member)
       return this.fail(res, {
         status: 400
       });
@@ -94,6 +94,7 @@ class AnswerDbController extends Router {
       { name },
       {
         name,
+        desc,
         title,
         intro,
         member,
@@ -144,8 +145,8 @@ class AnswerDbController extends Router {
   };
 
   updateLineDb = async (req, res) => {
-    const { name, title, intro, member } = req.body;
-    if (!name || !title || !intro || !member)
+    const { name, desc, title, intro, member } = req.body;
+    if (!name || !desc || !title || !intro || !member)
       return this.fail(res, {
         status: 400
       });
@@ -153,6 +154,7 @@ class AnswerDbController extends Router {
       { name },
       {
         name,
+        desc,
         title,
         intro,
         member
