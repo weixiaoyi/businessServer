@@ -9,7 +9,7 @@ class IdeaInterestController extends Router {
     this.init();
     this.ideaInterestView = "accountId createTime ideaId";
     this.ideaInterestPopIdeaView =
-      "popIdea.accountId popIdea.createTime  popIdea._id popIdea.title";
+      "popIdea.accountId popIdea.createTime  popIdea._id popIdea.title popIdea.online";
     this.interestnerPopView = "popUser.name popUser._id";
   }
 

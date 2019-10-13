@@ -8,7 +8,7 @@ class IdeaController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.ideaPreviewView = "accountId title createTime online";
+    this.ideaPreviewView = "accountId title createTime online denyWhy";
     this.ideaDetailView =
       "accountId title content createTime popUser._id popUser.name online";
   }
@@ -31,6 +31,11 @@ class IdeaController extends Router {
       this.publishIdea
     );
     this.router.put("/editIdea", [this.authority.checkLogin], this.editIdea);
+    this.router.put(
+      "/inspectIdea",
+      [this.authority.checkAdmin],
+      this.inspectIdea
+    );
   };
 
   getMyIdeas = async (req, res) => {
@@ -51,7 +56,7 @@ class IdeaController extends Router {
       },
       {
         field: "online",
-        type: this.env.isCustomer(req) ? "equals" : undefined,
+        type: this.env.isCustomer(req) && !mine ? "equals" : undefined,
         payload: "on"
       }
     ]);
@@ -66,7 +71,7 @@ class IdeaController extends Router {
         Model: Idea,
         pagination: { page, pageSize },
         match: {
-          ...(online ? { online } : {}),
+          ...(online && !mine ? { online } : {}),
           ...(mine ? { accountId: this.db.ObjectId(_id) } : {})
         },
         sort: {
@@ -220,6 +225,38 @@ class IdeaController extends Router {
     const result = await Idea.findOneAndUpdate(
       { _id: id, accountId: _id },
       { title, content },
+      { new: true }
+    ).catch(this.handleSqlError);
+    if (!result) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  inspectIdea = async (req, res) => {
+    const { id, online, denyWhy } = req.body;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      },
+      {
+        field: "online",
+        type: "isIn",
+        payload: ["on", "off"]
+      },
+      {
+        field: "denyWhy",
+        type: online === "off" ? "required" : undefined
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await Idea.findByIdAndUpdate(
+      { _id: id },
+      { online, denyWhy: online === "on" ? "" : denyWhy },
       { new: true }
     ).catch(this.handleSqlError);
     if (!result) return this.fail(res);

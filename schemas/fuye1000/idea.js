@@ -23,6 +23,9 @@ const ideaSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: ["on", "off"]
+    },
+    denyWhy: {
+      type: String
     }
   },
   { versionKey: false }
