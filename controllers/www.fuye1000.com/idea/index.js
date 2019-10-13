@@ -27,7 +27,7 @@ class IdeaController extends Router {
     this.router.get("/getIdeaDetail", this.getIdeaDetail);
     this.router.post(
       "/publishIdea",
-      [this.authority.checkLogin],
+      [this.authority.checkLogin, this.authority.checkUserBl],
       this.publishIdea
     );
     this.router.put("/editIdea", [this.authority.checkLogin], this.editIdea);
@@ -194,7 +194,7 @@ class IdeaController extends Router {
       title,
       content,
       createTime: Date.now(),
-      online: "on"
+      online: req.blIsNormal ? "on" : "off"
     });
     const result = await newIdea.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);

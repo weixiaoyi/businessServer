@@ -3,7 +3,7 @@ import { User, Member } from "../../models";
 import { Router, Authority, Validator, Db } from "../../components";
 import { splitQueryString, decryptString, RegExp } from "../../utils";
 import _ from "lodash";
-import { OAUTH, Domain } from "../../constants";
+import { OAUTH, Domain, ModelNames } from "../../constants";
 
 class UserController extends Router {
   constructor(props) {
@@ -51,11 +51,7 @@ class UserController extends Router {
 
   setSessionUser = user => {
     return {
-      _id: user._id,
-      name: user.name,
-      domain: user.domain, //用户购买会员判断domain
-      ...(user.phone ? { phone: user.phone } : {}),
-      ...(user.email ? { email: user.email } : {})
+      _id: user._id
     };
   };
 
@@ -100,6 +96,12 @@ class UserController extends Router {
       .handlePage({
         Model: User,
         pagination: { page, pageSize },
+        lookup: {
+          from: ModelNames.userBlackList,
+          localField: "_id",
+          foreignField: "accountId",
+          as: "popUserBlackList"
+        },
         project: {
           password: 0
         }
@@ -110,7 +112,8 @@ class UserController extends Router {
 
     return this.success(res, {
       data: result.data.map(item => ({
-        ...item
+        ...item,
+        popUserBlackList: item.popUserBlackList[0]
       })),
       pagination: {
         page,
@@ -283,6 +286,7 @@ class UserController extends Router {
 
   loginOut = async (req, res) => {
     req.session.user = null;
+    req.session.destroy();
     return this.success(res);
   };
 

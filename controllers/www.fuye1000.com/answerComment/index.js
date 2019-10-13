@@ -17,7 +17,7 @@ class AnswerCommentController extends Router {
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
-      [this.authority.checkLogin],
+      [this.authority.checkLogin, this.authority.checkUserBl],
       this.publishComment
     );
   };
@@ -111,7 +111,7 @@ class AnswerCommentController extends Router {
       comment,
       accountId: _id,
       createTime: Date.now(),
-      online: "on"
+      online: req.blIsNormal ? "on" : "off"
     });
     const result = await newComment.save().catch(this.handleSqlError);
     if (!result) return this.fail(res);

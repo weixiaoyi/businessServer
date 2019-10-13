@@ -52,6 +52,7 @@ app.use(
 );
 app.use(
   session({
+    name: "1000fuye.id",
     secret: process.env.MONGODB_SECRET,
     store: new MongoStore({
       mongooseConnection: db,
@@ -61,8 +62,9 @@ app.use(
     saveUninitialized: true,
     rolling: true,
     cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    }
+      maxAge: 3 * 24 * 60 * 60 * 1000
+    },
+    unset: "destroy"
   })
 );
 

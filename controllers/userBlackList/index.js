@@ -1,5 +1,6 @@
 import { UserBlackList } from "../../models";
-import { Router, Authority, Validator } from "../../components";
+import { Router, Authority, Validator, Db } from "../../components";
+import { ModelNames } from "../../constants";
 
 class UserBlackListController extends Router {
   constructor(props) {
@@ -10,11 +11,65 @@ class UserBlackListController extends Router {
   init = () => {
     this.authority = new Authority();
     this.validator = new Validator();
+    this.db = new Db();
+    this.router.get(
+      "/getBlackUsers",
+      [this.authority.checkAdmin],
+      this.getBlackUsers
+    );
     this.router.post(
       "/operationUserBlackList",
       [this.authority.checkLogin],
       this.operationUserBlackList
     );
+  };
+
+  getBlackUsers = async (req, res) => {
+    const { page, pageSize } = req.query;
+    const isValid = this.validator.validate(req.query, [
+      {
+        field: "page",
+        type: "isInt"
+      },
+      {
+        field: "pageSize",
+        type: "isInt"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+
+    const result = await this.db
+      .handlePage({
+        Model: UserBlackList,
+        pagination: { page, pageSize },
+        lookup: {
+          from: ModelNames.user,
+          localField: "accountId",
+          foreignField: "_id",
+          as: "popUser"
+        },
+        project: {
+          "popUser.password": 0
+        }
+      })
+      .catch(this.handleSqlError);
+
+    if (!result) return this.fail(res);
+
+    return this.success(res, {
+      data: result.data.map(item => ({
+        ...item,
+        popUser: item.popUser[0]
+      })),
+      pagination: {
+        page,
+        pageSize,
+        total: result.total
+      }
+    });
   };
 
   operationUserBlackList = async (req, res) => {
