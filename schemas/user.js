@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema(
     },
     domain: {
       type: String,
-      required: true
+      required: true,
+      trim: true,
+      enum: ["fuye"]
     },
     platform: String, //第三方账号平台
     userAgent: {

@@ -1,7 +1,7 @@
 export { default as User } from "./user";
 export { default as UserBlackList } from "./userBlackList";
 export { default as Member } from "./member";
-export { default as WebsiteInfo } from "./websiteInfo";
+export { default as WebsiteConfig } from "./websiteConfig";
 export { default as UserNav } from "./yijianxiazai/userNav";
 export { default as Answer } from "./fuye1000/answer";
 export { default as AnswerDb } from "./fuye1000/answerDb";

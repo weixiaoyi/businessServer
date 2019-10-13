@@ -4,7 +4,8 @@ const answerDbSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      trim: true
     },
     desc: {
       type: String,
@@ -31,7 +32,10 @@ const answerDbSchema = new mongoose.Schema(
       type: Date,
       required: true
     },
-    other: String,
+    other: {
+      type: String,
+      trim: true
+    },
     member: {
       limit: {
         type: Number,

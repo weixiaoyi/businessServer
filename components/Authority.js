@@ -40,6 +40,11 @@ class Authority extends Response {
         accountId: req.session.user._id
       }).catch(this.handleSqlError);
       if (userBl) {
+        if (userBl.type === "forbidden") {
+          return this.fail(res, {
+            msg: "您的账号存在异常，如有疑问请联系本站"
+          });
+        }
         req.blType = userBl.type;
         req.blIsNormal = userBl.type === "normal";
       } else {

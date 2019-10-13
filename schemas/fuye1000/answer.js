@@ -8,14 +8,16 @@ const answerSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     questionId: String,
     authorName: String,
     authorId: String,
     content: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     prevUpVoteNum: String,
     currentUpVoteNum: { type: Number, default: 1 },
@@ -26,7 +28,8 @@ const answerSchema = new mongoose.Schema(
     },
     dbName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     createTime: Date,
     updateTime: Date,

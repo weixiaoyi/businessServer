@@ -7,11 +7,13 @@ const ideaSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     content: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     createTime: {
       type: Date,

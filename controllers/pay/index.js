@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { Router, Authority, Validator } from "../../components";
 import { signature } from "./pay";
-import { Member, AnswerDb } from "../../models";
+import { Member, AnswerDb, User } from "../../models";
 import { Domain } from "../../constants";
 
 class PayController extends Router {
@@ -35,7 +35,6 @@ class PayController extends Router {
       transaction_id: "4200000357201908182662350239",
       sign: "213AC3BD467175689B3D40858E89C59D"
     };*/
-    console.log(req.body, "----req.body");
     const { attach, ...rest } = req.body;
     const isValidAttach = this.validator.validate(req.body, [
       {
@@ -103,10 +102,12 @@ class PayController extends Router {
 
   getPayImageUrl = async (req, res) => {
     const { user } = req.session;
-    const { domain } = user;
     let fee = "";
     let attach = "";
     let body = "会员 ";
+    const userInfo = await User.findById(user._id).catch(this.handleSqlError);
+    if (!userInfo) return this.fail(res);
+    const { domain } = userInfo;
     if (domain === "yijianxiazai.com") {
       fee = 2000;
     } else if (domain === "fuye") {
@@ -119,7 +120,7 @@ class PayController extends Router {
       ]);
       if (!isValid) return this.fail(res);
 
-      if (user.name === "18353268994" || user.name === "test") {
+      if (userInfo.name === "18353268994" || userInfo.name === "test") {
         body = "1000fuye.com 测试会员";
         fee = 1;
       } else if (dbName === "all") {
