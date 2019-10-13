@@ -67,15 +67,7 @@ class AnswerDbController extends Router {
       .catch(this.handleSqlError);
     if (!result) return this.fail(res);
     return this.success(res, {
-      data: result.data.concat({
-        _id: Date.now(),
-        name: "all.json",
-        title: "all",
-        member: {
-          limit: 1,
-          price: Domain.fuye.memberAllPrice
-        }
-      }),
+      data: result.data,
       pagination: {
         page,
         pageSize,

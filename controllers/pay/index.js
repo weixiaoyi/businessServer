@@ -1,8 +1,7 @@
 import fetch from "node-fetch";
 import { Router, Authority, Validator } from "../../components";
 import { signature } from "./pay";
-import { Member, AnswerDb, User } from "../../models";
-import { Domain } from "../../constants";
+import { Member, AnswerDb, User, WebsiteConfig } from "../../models";
 
 class PayController extends Router {
   constructor(props) {
@@ -109,7 +108,7 @@ class PayController extends Router {
     if (!userInfo) return this.fail(res);
     const { domain } = userInfo;
     if (domain === "yijianxiazai.com") {
-      fee = 2000;
+      fee = 20;
     } else if (domain === "fuye") {
       const { dbName } = req.query;
       const isValid = this.validator.validate(req.query, [
@@ -122,17 +121,21 @@ class PayController extends Router {
 
       if (userInfo.name === "18353268994" || userInfo.name === "test") {
         body = "1000fuye.com 测试会员";
-        fee = 1;
+        fee = 0.01;
       } else if (dbName === "all") {
         body = "1000fuye.com 一站通会员";
-        fee = Domain.fuye.memberAllPrice * 100;
+        const siteMemberInfo = await WebsiteConfig.findOne({
+          domain
+        }).catch(this.handleSqlError);
+        if (!siteMemberInfo) return this.fail(res);
+        fee = siteMemberInfo.detail.siteMemberPrice;
       } else {
         body = "1000fuye.com 教程会员";
         const answerDbInfo = await AnswerDb.findOne({ name: dbName }).catch(
           this.handleSqlError
         );
         if (!answerDbInfo) return this.fail(res);
-        fee = answerDbInfo.member.price * 100;
+        fee = answerDbInfo.member.price;
       }
       attach = JSON.stringify({
         accountId: user._id,
@@ -144,7 +147,7 @@ class PayController extends Router {
 
     const params = {
       mchid: "1549111861",
-      total_fee: fee,
+      total_fee: fee * 100,
       attach,
       body,
       out_trade_no: "no",
@@ -165,7 +168,8 @@ class PayController extends Router {
         data: {
           code_url: result.code_url,
           orderId: result.payjs_order_id,
-          qrCode: result.qrcode
+          qrCode: result.qrcode,
+          fee
         }
       });
     }
