@@ -1,4 +1,3 @@
-import { default as WebsiteConfigController } from "./websiteConfig";
 import { default as AnswerController } from "./answer";
 import { default as AnswerDbController } from "./answerDb";
 import { default as AnswerCommentController } from "./answerComment";
@@ -7,7 +6,6 @@ import { default as IdeaCommentController } from "./ideaComment";
 import { default as IdeaInterestController } from "./ideaInterest";
 
 const Controllers = app => {
-  app.use("/fuye1000/api/websiteConfig", WebsiteConfigController);
   app.use("/fuye1000/api/answers", AnswerController);
   app.use("/fuye1000/api/answerDbs", AnswerDbController);
   app.use("/fuye1000/api/answerComments", AnswerCommentController);

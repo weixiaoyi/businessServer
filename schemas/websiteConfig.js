@@ -8,9 +8,6 @@ const websiteConfigSchema = new mongoose.Schema(
       unique: true,
       enum: ["fuye"]
     },
-    siteMemberPrice: {
-      type: Number
-    },
     detail: mongoose.Schema.Types.Mixed
   },
   { versionKey: false }
