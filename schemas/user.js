@@ -16,11 +16,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       enum: ["fuye"]
     },
-    platform: String, //第三方账号平台
+    platform: String, //第三方账号
     userAgent: {
       type: String,
-      required: true
-    }, // pc,apple,linux,微信小程序，app
+      required: true,
+      trim: true,
+      enum: ["pc", "h5", "weixin", "app", "electron"]
+    },
     phone: {
       type: String,
       trim: true
