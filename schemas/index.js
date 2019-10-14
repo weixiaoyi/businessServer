@@ -2,6 +2,7 @@ export { default as userSchema } from "./user";
 export { default as userBlackListSchema } from "./userBlackList";
 export { default as memberSchema } from "./member";
 export { default as websiteConfigSchema } from "./websiteConfig";
+export { default as analysisSchema } from "./analysis";
 export { default as userNavSchema } from "./yijianxiazai/userNav";
 export { default as answerSchema } from "./fuye1000/answer";
 export { default as answerDbSchema } from "./fuye1000/answerDb";
