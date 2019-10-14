@@ -12,7 +12,11 @@ class CaptchaController extends Router {
   };
 
   getCaptcha = (req, res) => {
-    const captcha = svgCaptcha.create();
+    const captcha = svgCaptcha.create({
+      fontSize: 70,
+      height: 30,
+      noise: 0
+    });
     req.session.captcha = captcha.text;
     return this.success(res, { data: captcha.data });
   };

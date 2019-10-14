@@ -165,14 +165,14 @@ class UserController extends Router {
   };
 
   register = async (req, res) => {
-    const { domain, name, password, ...rest } = req.body;
+    const { domain, name, password, userAgent, captcha } = req.body;
     if (!this.checkNameAndPasswordFormat(domain, name, password)) {
       return this.fail(res, {
         msg: "Bad Request",
         status: 400
       });
     }
-    const user = { domain, name, password, ...rest };
+    const user = { domain, name, password, userAgent, captcha };
     return this.loginOrRegisterMode(req, res, user, "register");
   };
 
@@ -202,10 +202,20 @@ class UserController extends Router {
       }
       resultUser = findUser;
     } else {
-      const { userAgent } = user;
+      const { userAgent, captcha } = user;
       if (!userAgent) {
         return this.fail(res, {
           msg: "Bad Request",
+          status: 400
+        });
+      }
+      if (
+        !captcha ||
+        !req.session.captcha ||
+        captcha.toUpperCase() !== req.session.captcha.toUpperCase()
+      ) {
+        return this.fail(res, {
+          msg: "验证码错误，请填写正确验证码",
           status: 400
         });
       }
