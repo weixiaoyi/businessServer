@@ -38,7 +38,8 @@ class Authority extends Response {
     } else {
       const userBl = await UserBlackList.findOne({
         accountId: req.session.user._id
-      }).catch(this.handleSqlError);
+      }).catch(this.handleError);
+      if (this.isError(userBl)) return this.fail(res);
       if (userBl) {
         if (userBl.type === "forbidden") {
           return this.fail(res, {

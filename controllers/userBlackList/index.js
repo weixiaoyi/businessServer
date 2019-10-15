@@ -55,9 +55,9 @@ class UserBlackListController extends Router {
           "popUser.password": 0
         }
       })
-      .catch(this.handleSqlError);
+      .catch(this.handleError);
 
-    if (!result) return this.fail(res);
+    if (this.isError(result)) return this.fail(res);
 
     return this.success(res, {
       data: result.data.map(item => ({
@@ -98,7 +98,7 @@ class UserBlackListController extends Router {
         findLimit,
         { accountId, updateTime: Date.now(), $inc: { inspectTimes: 1 }, type },
         { new: true, upsert: true }
-      ).catch(this.handleSqlError);
+      ).catch(this.handleError);
     } else if (type === "forbidden") {
       result = await UserBlackList.findOneAndUpdate(
         findLimit,
@@ -109,7 +109,7 @@ class UserBlackListController extends Router {
           type
         },
         { new: true, upsert: true }
-      ).catch(this.handleSqlError);
+      ).catch(this.handleError);
     } else if (type === "normal") {
       result = await UserBlackList.findOneAndUpdate(
         findLimit,
@@ -120,9 +120,9 @@ class UserBlackListController extends Router {
           type
         },
         { new: true }
-      ).catch(this.handleSqlError);
+      ).catch(this.handleError);
     }
-    if (!result) return this.fail(res);
+    if (this.isError(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });

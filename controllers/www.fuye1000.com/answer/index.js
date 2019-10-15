@@ -86,8 +86,8 @@ class AnswerController extends Router {
     const dbInfo = await AnswerDb.findOne({
       name: dbName,
       ...(online ? { online } : {})
-    }).catch(this.handleSqlError);
-    if (!dbInfo)
+    }).catch(this.handleError);
+    if (this.isError(dbInfo) || this.isNull(dbInfo))
       return this.fail(res, { msg: "线上未找到对应的dbName,检查是否上线" });
 
     const dbInfoLimit = _.get(dbInfo, "member.limit");
@@ -97,7 +97,8 @@ class AnswerController extends Router {
       const { _id } = req.session.user;
       const memberInfo = await Member.findOne({
         accountId: _id
-      }).catch(this.handleSqlError);
+      }).catch(this.handleError);
+      if (this.isError(memberInfo)) return this.fail(res);
       hasMemberAuthority =
         _.get(memberInfo, `detail.all.status`) ||
         _.get(memberInfo, `detail.${dbName.replace(".json", "")}.status`);
@@ -113,9 +114,9 @@ class AnswerController extends Router {
         },
         project: this.answerView
       })
-      .catch(this.handleSqlError);
+      .catch(this.handleError);
 
-    if (!result) return this.fail(res);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
 
     return this.success(res, {
       data: result.data.map(item => ({
@@ -144,8 +145,8 @@ class AnswerController extends Router {
     const result = await Answer.findOneAndRemove(
       { answerId },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -160,8 +161,8 @@ class AnswerController extends Router {
         online: "off"
       },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -176,8 +177,8 @@ class AnswerController extends Router {
         online: "on"
       },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -207,8 +208,8 @@ class AnswerController extends Router {
       title,
       createTime: Date.now()
     });
-    const result = await newAnswer.save().catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    const result = await newAnswer.save().catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -227,8 +228,8 @@ class AnswerController extends Router {
         updateTime: Date.now()
       },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -246,8 +247,8 @@ class AnswerController extends Router {
         $inc: { currentUpVoteNum: 1 }
       },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -261,8 +262,8 @@ class AnswerController extends Router {
       });
 
     // 故意用find,而不是 findOne,避免找不到和catch冲突
-    const result = await Answer.find({ answerId }).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    const result = await Answer.find({ answerId }).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });

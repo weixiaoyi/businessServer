@@ -36,9 +36,9 @@ class WebsiteConfigController extends Router {
         status: 400
       });
     const result = await WebsiteConfig.findOne({ domain }).catch(
-      this.handleSqlError
+      this.handleError
     );
-    if (!result) return this.fail(res);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -67,8 +67,8 @@ class WebsiteConfigController extends Router {
         detail
       },
       { new: true, upsert: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
