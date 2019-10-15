@@ -1,3 +1,4 @@
+import _ from "lodash";
 class Response {
   success = (
     res,
@@ -41,31 +42,24 @@ class Response {
     if (type === "sql") {
       console.log("数据库操作错误", error);
       return {
-        msg: `${type}Error`,
+        errMsg: `${type}Error`,
         error
       };
     } else {
       console.log("未知操作错误", error);
       return {
-        msg: "unknownError",
+        errMsg: "unknownError",
         error
       };
     }
   };
 
-  isError = (handleErrorResult, type = "sql") => {
-    if (!handleErrorResult)
-      return console.error("isError缺少必要参数@handleErrorResult");
-    if (!handleErrorResult.msg || !handleErrorResult.error)
-      return console.error(
-        "isError的handleErrorResult参数必须是handleError的处理结果"
-      );
-    if (type) {
-      return type && handleErrorResult.msg === `${type}Error`;
-    } else {
-      return handleErrorResult.msg;
-    }
+  isError = handleErrorResult => {
+    if (!handleErrorResult) return false;
+    return handleErrorResult.errMsg;
   };
+
+  isNull = result => _.isNull(result);
 }
 
 export default Response;

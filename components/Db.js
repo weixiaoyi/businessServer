@@ -1,8 +1,9 @@
 import _ from "lodash";
 import mongoose from "mongoose";
+import Response from "./Response";
 import { aggregate } from "../utils";
 
-class Db {
+class Db extends Response {
   // 分页聚合
   handlePage = async ({
     Model,
@@ -84,9 +85,10 @@ class Db {
               : []
           )
       })
-      .catch(this.handleSqlError);
+      .catch(this.handleError);
+    if (this.isError(res)) return Promise.reject(res);
     const [total, data] = [_.get(res, "0.total.0.total"), _.get(res, "0.data")];
-    if (!data) return Promise.reject("分页错误");
+    if (!data) return Promise.reject(res);
     return {
       total,
       data: map ? data.map(map) : data
@@ -96,7 +98,7 @@ class Db {
   // 普通聚合
   handleAggregate = async ({ Model, match, project, lookup, map, sort }) => {
     if (!Model) return console.error("handleAggregate参数错误");
-    const data = await Model.aggregate(
+    const res = await Model.aggregate(
       []
         .concat(
           match
@@ -138,9 +140,9 @@ class Db {
               ]
             : []
         )
-    ).catch(this.handleSqlError);
-    if (!data) return Promise.reject("handleAggregate聚合查询错误");
-    return map ? data.map(map) : data;
+    ).catch(this.handleError);
+    if (this.isError(res)) return Promise.reject(res);
+    return map ? res.map(map) : res;
   };
 
   ObjectId = id => mongoose.Types.ObjectId(id);

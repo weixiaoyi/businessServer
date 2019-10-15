@@ -57,8 +57,9 @@ class UserController extends Router {
 
   getUserInfo = async (req, res) => {
     const user = req.session.user;
-    const findUser = await User.findById(user._id).catch(this.handleSqlError);
-    if (!findUser) {
+    const findUser = await User.findById(user._id).catch(this.handleError);
+    if (this.isError(findUser)) return this.fail(res);
+    if (this.isNull(findUser)) {
       return this.fail(res, {
         msg: "账户不存在",
         status: 404
@@ -70,8 +71,9 @@ class UserController extends Router {
   getUserMemberInfo = async (req, res) => {
     const { _id } = req.session.user;
     const findMember = await Member.findOne({ accountId: _id }).catch(
-      this.handleSqlError
+      this.handleError
     );
+    if (this.isError(findMember)) return this.fail(res);
     return this.success(res, { data: findMember });
   };
 
@@ -106,9 +108,9 @@ class UserController extends Router {
           password: 0
         }
       })
-      .catch(this.handleSqlError);
+      .catch(this.handleError);
 
-    if (!result) return this.fail(res);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
 
     return this.success(res, {
       data: result.data.map(item => ({
@@ -144,8 +146,8 @@ class UserController extends Router {
         ...(email ? { email } : {})
       },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!updatedUser) {
+    ).catch(this.handleError);
+    if (this.isError(updatedUser) || this.isNull(updatedUser)) {
       return this.fail(res);
     }
     req.session.user = this.setSessionUser(updatedUser);
@@ -188,9 +190,12 @@ class UserController extends Router {
   loginOrRegisterMode = async (req, res, user, mode) => {
     let resultUser = null;
     const { domain, name, password } = user;
-    const findUser = await this.checkDomainUserNameIsExist(domain, name);
+    const findUser = await this.checkDomainUserNameIsExist(domain, name).catch(
+      this.handleError
+    );
+    if (this.isError(findUser)) return this.fail(res);
     if (mode === "login") {
-      if (!findUser) {
+      if (this.isNull(findUser)) {
         return this.fail(res, {
           msg: "账户不存在"
         });
@@ -229,7 +234,7 @@ class UserController extends Router {
           decrypt: req.decrypt,
           createTime: timeNow
         });
-        return await newUser.save().catch(this.handleSqlError);
+        return newUser.save();
       };
       if (mode === "register") {
         if (findUser) {
@@ -237,21 +242,22 @@ class UserController extends Router {
             msg: "账户名已经存在"
           });
         }
-
         const isDecryptExist = await this.checkDecryptIsExist(
           req.decrypt
-        ).catch(this.handleSqlError);
+        ).catch(this.handleError);
+        if (this.isError(isDecryptExist)) return this.fail(res);
         if (isDecryptExist) {
           return this.fail(res, {
             msg: "Bad Request",
             status: 400
           });
         }
-        resultUser = await createUser();
+        resultUser = await createUser().catch(this.handleError);
+        if (this.isError(resultUser)) return this.fail(res);
       } else if (mode === "ifNotRegisterThenLogin") {
         // resultUser = findUser;
       }
-      if (!resultUser)
+      if (this.isNull(resultUser))
         return this.fail(res, {
           msg: "账户创建失败"
         });
@@ -260,13 +266,10 @@ class UserController extends Router {
     return this.sendUser(req, res, resultUser);
   };
 
-  checkDomainUserNameIsExist = async (domain, name) => {
-    return await User.findOne({ domain, name }).catch(this.handleSqlError);
-  };
+  checkDomainUserNameIsExist = async (domain, name) =>
+    User.findOne({ domain, name });
 
-  checkDecryptIsExist = async decrypt => {
-    return await User.findOne({ decrypt }).catch(this.handleSqlError);
-  };
+  checkDecryptIsExist = async decrypt => User.findOne({ decrypt });
 
   checkNameAndPasswordFormat = (domain, name, password) => {
     const isValid = this.validator.validate(undefined, [

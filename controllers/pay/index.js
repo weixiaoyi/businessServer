@@ -67,7 +67,7 @@ class PayController extends Router {
         }
       },
       { new: true, upsert: true }
-    ).catch(this.handleSqlError);
+    ).catch(this.handleError);
     return this.success(res);
   };
 
@@ -95,7 +95,7 @@ class PayController extends Router {
         }
       },
       { new: true }
-    ).catch(this.handleSqlError);
+    ).catch(this.handleError);
     return this.success(res);
   };
 
@@ -104,8 +104,8 @@ class PayController extends Router {
     let fee = "";
     let attach = "";
     let body = "会员 ";
-    const userInfo = await User.findById(user._id).catch(this.handleSqlError);
-    if (!userInfo) return this.fail(res);
+    const userInfo = await User.findById(user._id).catch(this.handleError);
+    if (this.isError(userInfo) || this.isNull(userInfo)) return this.fail(res);
     const { domain } = userInfo;
     if (domain === "yijianxiazai.com") {
       fee = 20;
@@ -126,15 +126,17 @@ class PayController extends Router {
         body = "1000fuye.com 一站通会员";
         const siteMemberInfo = await WebsiteConfig.findOne({
           domain
-        }).catch(this.handleSqlError);
-        if (!siteMemberInfo) return this.fail(res);
+        }).catch(this.handleError);
+        if (this.isError(siteMemberInfo) || this.isNull(siteMemberInfo))
+          return this.fail(res);
         fee = siteMemberInfo.detail.siteMemberPrice;
       } else {
         body = "1000fuye.com 教程会员";
         const answerDbInfo = await AnswerDb.findOne({ name: dbName }).catch(
-          this.handleSqlError
+          this.handleError
         );
-        if (!answerDbInfo) return this.fail(res);
+        if (this.isError(answerDbInfo) || this.isNull(answerDbInfo))
+          return this.fail(res);
         fee = answerDbInfo.member.price;
       }
       attach = JSON.stringify({
@@ -160,9 +162,8 @@ class PayController extends Router {
       body: JSON.stringify(signUrl)
     })
       .then(res => res.json())
-      .catch(() => {
-        return null;
-      });
+      .catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     if (result && result.sign) {
       return this.success(res, {
         data: {
