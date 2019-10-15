@@ -31,11 +31,6 @@ class Response {
     return null;
   };
 
-  handleSqlError = error => {
-    console.log("数据库操作错误", error);
-    return null;
-  };
-
   handleError = (error, type = "sql") => {
     if (!error || !type)
       return console.error("handleError缺少必要参数@error，@type");
@@ -60,6 +55,11 @@ class Response {
   };
 
   isNull = result => _.isNull(result);
+
+  handleSqlError = error => {
+    console.log("数据库操作错误", error);
+    return null;
+  };
 }
 
 export default Response;
