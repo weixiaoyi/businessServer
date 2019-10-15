@@ -130,8 +130,8 @@ class IdeaController extends Router {
           };
         }
       })
-      .catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+      .catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result.data,
       pagination: {
@@ -175,8 +175,8 @@ class IdeaController extends Router {
           };
         }
       })
-      .catch(this.handleSqlError);
-    if (!data) return this.fail(res);
+      .catch(this.handleError);
+    if (this.isError(data) || this.isNull(data)) return this.fail(res);
     if (!_.get(data, "length"))
       return this.fail(res, {
         status: 400,
@@ -201,8 +201,8 @@ class IdeaController extends Router {
       createTime: Date.now(),
       online: req.blIsNormal ? "on" : "off"
     });
-    const result = await newIdea.save().catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    const result = await newIdea.save().catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -226,8 +226,8 @@ class IdeaController extends Router {
       { _id: id, accountId: _id },
       { title, content },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
@@ -258,8 +258,8 @@ class IdeaController extends Router {
       { _id: id },
       { online, denyWhy: online === "on" ? "" : denyWhy },
       { new: true }
-    ).catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });

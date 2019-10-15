@@ -83,9 +83,9 @@ class IdeaCommentController extends Router {
           };
         }
       })
-      .catch(this.handleSqlError);
+      .catch(this.handleError);
 
-    if (!result) return this.fail(res);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result.data,
       pagination: {
@@ -133,8 +133,8 @@ class IdeaCommentController extends Router {
           }
         : {})
     });
-    const result = await newComment.save().catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+    const result = await newComment.save().catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });

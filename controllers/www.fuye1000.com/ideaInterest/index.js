@@ -125,8 +125,8 @@ class IdeaInterestController extends Router {
           };
         }
       })
-      .catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+      .catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result.data,
       pagination: {
@@ -185,8 +185,8 @@ class IdeaInterestController extends Router {
           };
         }
       })
-      .catch(this.handleSqlError);
-    if (!result) return this.fail(res);
+      .catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result.data,
       pagination: {
@@ -225,13 +225,13 @@ class IdeaInterestController extends Router {
         findLimit,
         { accountId: _id, ideaId, createTime: Date.now() },
         { new: true, upsert: true }
-      ).catch(this.handleSqlError);
+      ).catch(this.handleError);
     } else if (action === "delete") {
       result = await IdeaInterest.findOneAndRemove(findLimit).catch(
-        this.handleSqlError
+        this.handleError
       );
     }
-    if (!result) return this.fail(res);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
     });
