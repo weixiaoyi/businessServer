@@ -13,7 +13,8 @@ class Db extends Response {
     lookup,
     map,
     sort,
-    group
+    group,
+    matchAfterLookup
   }) => {
     if (!Model || !pagination) return console.error("handlePage参数错误");
     const res = await Model.aggregate(
@@ -62,6 +63,15 @@ class Db extends Response {
                       $lookup: lookup
                     }
                   ]
+              : []
+          )
+          .concat(
+            matchAfterLookup
+              ? [
+                  {
+                    $match: matchAfterLookup
+                  }
+                ]
               : []
           )
           .concat(

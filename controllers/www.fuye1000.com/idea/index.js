@@ -1,5 +1,5 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
-import { Idea } from "../../../models";
+import { Idea, IdeaComment, IdeaInterest } from "../../../models";
 import { aggregate, trimHtml } from "../../../utils";
 import { ModelNames } from "../../../constants";
 import _ from "lodash";
@@ -251,13 +251,27 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const result = await Idea.findOneAndRemove(
-      {
-        _id: ideaId,
-        accountId: _id
-      },
-      { new: true }
-    ).catch(this.handleError);
+    const result = await Promise.all([
+      Idea.findOneAndRemove(
+        {
+          _id: ideaId,
+          accountId: _id
+        },
+        { new: true }
+      ),
+      IdeaInterest.findOneAndRemove(
+        {
+          ideaId
+        },
+        { new: true }
+      ),
+      IdeaComment.deleteMany(
+        {
+          ideaId
+        },
+        { new: true }
+      )
+    ]).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result

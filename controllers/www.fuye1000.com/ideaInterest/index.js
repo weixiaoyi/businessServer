@@ -79,6 +79,9 @@ class IdeaInterestController extends Router {
             as: "popIdeaInterest"
           }
         ],
+        matchAfterLookup: {
+          "popIdea.online": "on"
+        },
         project: aggregate.project(
           `${this.ideaInterestView} ${this.ideaInterestPopIdeaView}`,
           {
