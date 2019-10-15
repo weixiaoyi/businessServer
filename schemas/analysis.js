@@ -16,11 +16,8 @@ const analysisSchema = new mongoose.Schema(
     stayTime: {
       type: Number
     },
-    visitRecords: [[String]],
-
-    // error
-    error: mongoose.Schema.Types.Mixed,
-
+    userInfo: mongoose.Schema.Types.Mixed,
+    records: [[mongoose.Schema.Types.Mixed]],
     createTime: {
       type: Date,
       required: true
