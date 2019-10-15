@@ -21,6 +21,11 @@ class IdeaCommentController extends Router {
       [this.authority.checkLogin, this.authority.checkUserBl],
       this.publishComment
     );
+    this.router.delete(
+      "/deleteComment",
+      [this.authority.checkLogin],
+      this.deleteComment
+    );
   };
 
   getComments = async (req, res) => {
@@ -134,6 +139,32 @@ class IdeaCommentController extends Router {
         : {})
     });
     const result = await newComment.save().catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  deleteComment = async (req, res) => {
+    const { commentId } = req.body;
+    const { _id } = req.session.user;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "commentId",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await IdeaComment.findOneAndRemove(
+      {
+        _id: commentId,
+        accountId: _id
+      },
+      { new: true }
+    ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
