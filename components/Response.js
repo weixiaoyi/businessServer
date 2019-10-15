@@ -34,6 +34,38 @@ class Response {
     console.log("数据库操作错误", error);
     return null;
   };
+
+  handleError = (error, type = "sql") => {
+    if (!error || !type)
+      return console.error("handleError缺少必要参数@error，@type");
+    if (type === "sql") {
+      console.log("数据库操作错误", error);
+      return {
+        msg: `${type}Error`,
+        error
+      };
+    } else {
+      console.log("未知操作错误", error);
+      return {
+        msg: "unknownError",
+        error
+      };
+    }
+  };
+
+  isError = (handleErrorResult, type = "sql") => {
+    if (!handleErrorResult)
+      return console.error("isError缺少必要参数@handleErrorResult");
+    if (!handleErrorResult.msg || !handleErrorResult.error)
+      return console.error(
+        "isError的handleErrorResult参数必须是handleError的处理结果"
+      );
+    if (type) {
+      return type && handleErrorResult.msg === `${type}Error`;
+    } else {
+      return handleErrorResult.msg;
+    }
+  };
 }
 
 export default Response;
