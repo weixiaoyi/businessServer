@@ -31,6 +31,11 @@ class IdeaController extends Router {
       this.publishIdea
     );
     this.router.put("/editIdea", [this.authority.checkLogin], this.editIdea);
+    this.router.delete(
+      "/deleteIdea",
+      [this.authority.checkLogin],
+      this.deleteIdea
+    );
     this.router.put(
       "/inspectIdea",
       [this.authority.checkAdmin],
@@ -225,6 +230,32 @@ class IdeaController extends Router {
     const result = await Idea.findOneAndUpdate(
       { _id: id, accountId: _id },
       { title, content },
+      { new: true }
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  deleteIdea = async (req, res) => {
+    const { ideaId } = req.body;
+    const { _id } = req.session.user;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "ideaId",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await Idea.findOneAndRemove(
+      {
+        _id: ideaId,
+        accountId: _id
+      },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
