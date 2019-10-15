@@ -197,6 +197,7 @@ class UserController extends Router {
     if (mode === "login") {
       if (this.isNull(findUser)) {
         return this.fail(res, {
+          status: 404,
           msg: "账户不存在"
         });
       }
