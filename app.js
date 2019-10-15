@@ -28,6 +28,7 @@ db.on("error", () => console.warn("数据库链接失败"));
 db.once("open", () => console.log("数据库链接成功"));
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(
   cors({
     origin: "*", //指定接收的地址
@@ -63,6 +64,7 @@ app.use(
     rolling: true,
     cookie: {
       maxAge: 3 * 24 * 60 * 60 * 1000
+      // secure: true //https环境开启
     },
     unset: "destroy"
   })

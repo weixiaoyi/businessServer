@@ -45,7 +45,7 @@ class Authority extends Response {
             msg: "您的账号存在异常，如有疑问请联系本站"
           });
         }
-        req.blType = userBl.type;
+        // req.blType = userBl.type; //暂时不需要挂载
         req.blIsNormal = userBl.type === "normal";
       } else {
         req.blIsNormal = true;
