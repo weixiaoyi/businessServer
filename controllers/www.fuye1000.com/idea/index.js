@@ -229,7 +229,7 @@ class IdeaController extends Router {
     const { _id } = req.session.user;
     const result = await Idea.findOneAndUpdate(
       { _id: id, accountId: _id },
-      { title, content },
+      { title, content, denyWhy: "", updateTime: Date.now() },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
@@ -301,7 +301,11 @@ class IdeaController extends Router {
       });
     const result = await Idea.findByIdAndUpdate(
       { _id: id },
-      { online, denyWhy: online === "on" ? "" : denyWhy },
+      {
+        online,
+        denyWhy: online === "on" ? "" : denyWhy,
+        ...(online === "on" ? {} : { $inc: { denyTimes: 1 } })
+      },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);

@@ -19,6 +19,9 @@ const ideaSchema = new mongoose.Schema(
       type: Date,
       required: true
     },
+    updateTime: {
+      type: Date
+    },
     online: {
       type: String,
       required: true,
@@ -26,6 +29,9 @@ const ideaSchema = new mongoose.Schema(
     },
     denyWhy: {
       type: String
+    },
+    denyTimes: {
+      type: Number
     }
   },
   { versionKey: false }
