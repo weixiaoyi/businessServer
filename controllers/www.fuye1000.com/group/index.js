@@ -35,8 +35,12 @@ class GroupController extends Router {
   };
 
   addGroup = async (req, res) => {
-    const { type, title, desc, avatar } = req.body;
+    const { index, type, title, desc, avatar } = req.body;
     const isValid = this.validator.validate(req.body, [
+      {
+        field: "index",
+        type: "required"
+      },
       {
         field: "type",
         type: "required"
@@ -61,7 +65,7 @@ class GroupController extends Router {
 
     const result = await Group.findOneAndUpdate(
       { type, title },
-      { type, title, desc, avatar, createTime: Date.now() },
+      { index, type, title, desc, avatar, createTime: Date.now() },
       { new: true, upsert: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
@@ -71,8 +75,12 @@ class GroupController extends Router {
   };
 
   updateGroup = async (req, res) => {
-    const { id, type, title, desc, avatar } = req.body;
+    const { id, index, type, title, desc, avatar } = req.body;
     const isValid = this.validator.validate(req.body, [
+      {
+        field: "index",
+        type: "required"
+      },
       {
         field: "id",
         type: "isMongoId"
@@ -101,7 +109,7 @@ class GroupController extends Router {
 
     const result = await Group.findByIdAndUpdate(
       id,
-      { type, title, desc, avatar, updateTime: Date.now() },
+      { index, type, title, desc, avatar, updateTime: Date.now() },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);

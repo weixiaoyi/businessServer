@@ -31,7 +31,7 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(
   cors({
-    origin: "*", //指定接收的地址
+    origin: "localhost", //指定接收的地址
     methods: ["PUT", "GET", "POST", "DELETE", "OPTIONS"], //指定接收的请求类型
     credentials: true
   })

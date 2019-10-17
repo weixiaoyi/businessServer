@@ -22,7 +22,8 @@ const groupSchema = new mongoose.Schema(
       trim: true
     },
     createTime: Date,
-    updateTime: Date
+    updateTime: Date,
+    index: Number
   },
   { versionKey: false }
 );
