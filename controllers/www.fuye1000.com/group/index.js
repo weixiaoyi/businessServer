@@ -14,6 +14,16 @@ class GroupController extends Router {
     this.env = new Env();
     this.router.get("/getGroups", this.getGroups);
     this.router.post("/addGroup", [this.authority.checkAdmin], this.addGroup);
+    this.router.put(
+      "/updateGroup",
+      [this.authority.checkAdmin],
+      this.updateGroup
+    );
+    this.router.delete(
+      "/deleteGroup",
+      [this.authority.checkAdmin],
+      this.deleteGroup
+    );
   };
 
   getGroups = async (req, res) => {
@@ -54,6 +64,68 @@ class GroupController extends Router {
       { type, title, desc, avatar, createTime: Date.now() },
       { new: true, upsert: true }
     ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  updateGroup = async (req, res) => {
+    const { id, type, title, desc, avatar } = req.body;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      },
+      {
+        field: "type",
+        type: "required"
+      },
+      {
+        field: "title",
+        type: "required"
+      },
+      {
+        field: "desc",
+        type: "required"
+      },
+      {
+        field: "avatar",
+        type: "required"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+
+    const result = await Group.findByIdAndUpdate(
+      id,
+      { type, title, desc, avatar, updateTime: Date.now() },
+      { new: true }
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  deleteGroup = async (req, res) => {
+    const { id } = req.body;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+
+    const result = await Group.findByIdAndRemove(id, { new: true }).catch(
+      this.handleError
+    );
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result
