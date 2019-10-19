@@ -33,7 +33,8 @@ const answerSchema = new mongoose.Schema(
     },
     createTime: Date,
     updateTime: Date,
-    other: String
+    other: String,
+    index: Number
   },
   { versionKey: false }
 );

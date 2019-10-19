@@ -10,11 +10,7 @@ class WebsiteConfigController extends Router {
   init = () => {
     this.authority = new Authority();
     this.validator = new Validator();
-    this.router.get(
-      "/getWebsiteConfig",
-      [this.authority.checkAdmin],
-      this.getWebsiteConfig
-    );
+    this.router.get("/getWebsiteConfig", this.getWebsiteConfig);
     this.router.post(
       "/operationWebsiteConfig",
       [this.authority.checkAdmin],
@@ -46,25 +42,34 @@ class WebsiteConfigController extends Router {
 
   operationWebsiteConfig = async (req, res) => {
     const { domain, detail } = req.body;
-    const isValid = this.validator.validate(req.body, [
+    const { siteMemberPrice, notifies } = detail;
+    const isValid = this.validator.validate(undefined, [
       {
-        field: "domain",
+        value: domain,
         type: "isIn",
         payload: ["fuye"]
       },
       {
-        field: "detail",
-        type: "required"
+        value: siteMemberPrice,
+        type: "isInt"
       }
     ]);
-    if (!isValid)
+    if (
+      !isValid ||
+      (notifies &&
+        !notifies.every(item => item.content && item.date && item.type))
+    )
       return this.fail(res, {
         status: 400
       });
+
     const result = await WebsiteConfig.findOneAndUpdate(
       { domain },
       {
-        detail
+        detail: {
+          siteMemberPrice,
+          ...(notifies ? { notifies } : {})
+        }
       },
       { new: true, upsert: true }
     ).catch(this.handleError);

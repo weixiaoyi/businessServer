@@ -32,7 +32,8 @@ const ideaSchema = new mongoose.Schema(
     },
     denyTimes: {
       type: Number
-    }
+    },
+    index: Number
   },
   { versionKey: false }
 );

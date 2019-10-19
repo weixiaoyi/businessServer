@@ -25,7 +25,8 @@ const answerCommentSchema = new mongoose.Schema(
     },
     denyWhy: {
       type: String
-    }
+    },
+    index: Number
   },
   { versionKey: false }
 );
