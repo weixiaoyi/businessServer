@@ -32,7 +32,7 @@ class IdeaInterestController extends Router {
   };
 
   getInterest = async (req, res) => {
-    const { page, pageSize } = req.query;
+    const { page, pageSize, title } = req.query;
     const isValid = this.validator.validate(req.query, [
       {
         field: "page",
@@ -41,6 +41,11 @@ class IdeaInterestController extends Router {
       {
         field: "pageSize",
         type: "isInt"
+      },
+      {
+        field: "title",
+        transform: String,
+        type: title ? "required" : undefined
       }
     ]);
     if (!isValid)
@@ -80,7 +85,12 @@ class IdeaInterestController extends Router {
           }
         ],
         matchAfterLookup: {
-          "popIdea.online": "on"
+          "popIdea.online": "on",
+          ...(title && title.trim()
+            ? {
+                "popIdea.title": { $regex: title.trim() }
+              }
+            : {})
         },
         project: aggregate.project(
           `${this.ideaInterestView} ${this.ideaInterestPopIdeaView}`,

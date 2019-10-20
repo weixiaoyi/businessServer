@@ -49,7 +49,7 @@ class IdeaController extends Router {
   };
 
   getIdeasPreview = async (req, res) => {
-    const { page, pageSize, online, mine } = req.query;
+    const { page, pageSize, online, mine, title } = req.query;
     const isValid = this.validator.validate(req.query, [
       {
         field: "page",
@@ -63,6 +63,11 @@ class IdeaController extends Router {
         field: "online",
         type: this.env.isCustomer(req) && !mine ? "equals" : undefined,
         payload: "on"
+      },
+      {
+        field: "title",
+        transform: String,
+        type: title ? "required" : undefined
       }
     ]);
     if (!isValid)
@@ -77,7 +82,12 @@ class IdeaController extends Router {
         pagination: { page, pageSize },
         match: {
           ...(online && !mine ? { online } : {}),
-          ...(mine ? { accountId: this.db.ObjectId(_id) } : {})
+          ...(mine ? { accountId: this.db.ObjectId(_id) } : {}),
+          ...(title && title.trim()
+            ? {
+                title: { $regex: title.trim() }
+              }
+            : {})
         },
         sort: {
           createTime: -1
