@@ -124,7 +124,7 @@ class PayController extends Router {
       attach,
       body,
       out_trade_no: "no",
-      notify_url: "http://1000fuye.com/api/pay/notify"
+      notify_url: "https://1000fuye.com/api/pay/notify"
     };
     const signUrl = signature(params);
     const result = await fetch("https://payjs.cn/api/native", {
