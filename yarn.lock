@@ -1963,6 +1963,11 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.0"
 
+fastscan@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.npmjs.org/fastscan/-/fastscan-1.0.6.tgz#4efea05f60394f2d3e3634f5ee2291be0e67d356"
+  integrity sha512-PGpoEDNcA4CEvLgJ0p8zN16A7jy1+F2VnxtEHq8ShafOd1SvAdEEnrlm7ZJQ0XxRka+bltaqYbB+lw2sSug6Hw==
+
 fclone@1.0.11, fclone@^1.0.11:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/fclone/-/fclone-1.0.11.tgz#10e85da38bfea7fc599341c296ee1d77266ee640"
@@ -2956,6 +2961,13 @@ lru-cache@^4.1.2:
   dependencies:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
+
+lru-cache@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
+  integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
+  dependencies:
+    yallist "^3.0.2"
 
 make-dir@^2.0.0:
   version "2.1.0"

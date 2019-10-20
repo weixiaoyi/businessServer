@@ -1,6 +1,7 @@
 import Response from "./Response";
 import Env from "./Env";
 import { UserBlackList } from "../models";
+import { Messages, SetReq } from "../constants";
 
 class Authority extends Response {
   constructor(props) {
@@ -43,13 +44,13 @@ class Authority extends Response {
       if (userBl) {
         if (userBl.type === "forbidden") {
           return this.fail(res, {
-            msg: "您的账号存在异常，如有疑问请联系本站"
+            msg: Messages.accountForbidden
           });
         }
         // req.blType = userBl.type; //暂时不需要挂载
-        req.blIsNormal = userBl.type === "normal";
+        SetReq(req, "blIsNormal", userBl.type === "normal");
       } else {
-        req.blIsNormal = true;
+        SetReq(req, "blIsNormal", true);
       }
       next();
     }

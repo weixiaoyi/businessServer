@@ -30,3 +30,28 @@ export const ModelNames = {
     ideaInterest: `${Domain.fuye.prefix}ideaInterest`
   }
 };
+
+export const Messages = {
+  accountForbidden: "您的账号存在异常，如有疑问请联系本站",
+  sensitiveWord: "数据内容包含敏感信息，请遵守互联网文明合法用语规范重新输入！"
+};
+
+export const CacheKeys = {
+  sensitiveWord: "sensitiveWord"
+};
+
+export const SetReqSession = (req, key, value) => {
+  if (key === "user") {
+    req.session.user = value;
+  } else if (key === "captcha") {
+    req.session.captcha = value;
+  }
+};
+
+export const SetReq = (req, key, value) => {
+  if (key === "decrypt") {
+    req.decrypt = value;
+  } else if (key === "blIsNormal") {
+    req.blIsNormal = value;
+  }
+};

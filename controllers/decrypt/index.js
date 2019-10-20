@@ -1,5 +1,6 @@
 import { Router } from "../../components";
 import { checkDecrypt } from "./checkDecrypt";
+import { SetReq } from "../../constants";
 
 class DecryptController extends Router {
   constructor(props) {
@@ -17,7 +18,7 @@ class DecryptController extends Router {
       },
       (req, res, next) => {
         try {
-          req.decrypt = checkDecrypt(req.headers.authorization);
+          SetReq(req, "decrypt", checkDecrypt(req.headers.authorization));
           req.headers.signature && checkDecrypt(req.headers.signature);
           next();
         } catch (e) {

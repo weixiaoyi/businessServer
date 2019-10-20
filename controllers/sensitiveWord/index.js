@@ -1,5 +1,7 @@
 import { SensitiveWord } from "../../models";
 import { Router, Authority, Validator, Db } from "../../components";
+import { Cache } from "../../componentsSingle";
+import { CacheKeys } from "../../constants";
 
 class SensitiveWordController extends Router {
   constructor(props) {
@@ -55,6 +57,7 @@ class SensitiveWordController extends Router {
       { new: true, upsert: true }
     ).catch(this.handleError);
     if (this.isError(result)) return this.fail(res);
+    Cache.del(CacheKeys.sensitiveWord);
     return this.success(res, {
       data: result
     });
@@ -82,6 +85,7 @@ class SensitiveWordController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result)) return this.fail(res);
+    Cache.del(CacheKeys.sensitiveWord);
     return this.success(res, {
       data: result
     });
@@ -103,6 +107,7 @@ class SensitiveWordController extends Router {
       new: true
     }).catch(this.handleError);
     if (this.isError(result)) return this.fail(res);
+    Cache.del(CacheKeys.sensitiveWord);
     return this.success(res, {
       data: result
     });

@@ -1,5 +1,6 @@
 import svgCaptcha from "svg-captcha";
 import { Router } from "../../components";
+import { SetReqSession } from "../../constants";
 
 class CaptchaController extends Router {
   constructor(props) {
@@ -17,7 +18,8 @@ class CaptchaController extends Router {
       height: 30,
       noise: 0
     });
-    req.session.captcha = captcha.text;
+
+    SetReqSession(req, "captcha", captcha.text);
     return this.success(res, { data: captcha.data });
   };
 }

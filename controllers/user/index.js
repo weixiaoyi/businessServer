@@ -3,7 +3,7 @@ import { User, Member } from "../../models";
 import { Router, Authority, Validator, Db } from "../../components";
 import { splitQueryString, decryptString, RegExp } from "../../utils";
 import _ from "lodash";
-import { OAUTH, Domain, ModelNames } from "../../constants";
+import { OAUTH, Domain, ModelNames, SetReqSession } from "../../constants";
 
 class UserController extends Router {
   constructor(props) {
@@ -150,7 +150,7 @@ class UserController extends Router {
     if (this.isError(updatedUser) || this.isNull(updatedUser)) {
       return this.fail(res);
     }
-    req.session.user = this.setSessionUser(updatedUser);
+    SetReqSession(req, "user", this.setSessionUser(updatedUser));
     return this.sendUser(req, res, updatedUser);
   };
 
@@ -263,7 +263,7 @@ class UserController extends Router {
           msg: "账户创建失败"
         });
     }
-    req.session.user = this.setSessionUser(resultUser);
+    SetReqSession(req, "user", this.setSessionUser(resultUser));
     return this.sendUser(req, res, resultUser);
   };
 
@@ -297,7 +297,7 @@ class UserController extends Router {
   };
 
   loginOut = async (req, res) => {
-    req.session.user = null;
+    SetReqSession(req, "user", null);
     req.session.destroy();
     return this.success(res);
   };
