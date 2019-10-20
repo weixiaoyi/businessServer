@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { websiteConfigSchema } from "../schemas";
+import { ModelNames } from "../constants";
 const WebsiteConfig = mongoose.model(
-  "websiteConfig",
+  ModelNames.websiteConfig,
   websiteConfigSchema,
-  "websiteConfig"
+  ModelNames.websiteConfig
 );
 
 export default WebsiteConfig;

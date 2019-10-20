@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 import { analysisSchema } from "../schemas";
-const Analysis = mongoose.model("analysis", analysisSchema, "analysis");
+import { ModelNames } from "../constants";
+const Analysis = mongoose.model(
+  ModelNames.analysis,
+  analysisSchema,
+  ModelNames.analysis
+);
 
 export default Analysis;

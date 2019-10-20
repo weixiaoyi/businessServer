@@ -16,6 +16,9 @@ export const ModelNames = {
   user: "user",
   userBlackList: "userBlackList",
   member: "member",
+  websiteConfig: "websiteConfig",
+  analysis: "analysis",
+  sensitiveWord: "sensitiveWord",
   //-------------fuye1000.com
 
   fuye: {
