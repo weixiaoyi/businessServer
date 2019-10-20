@@ -39,6 +39,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: true
     },
+    lastLoginTime: {
+      type: Date
+    },
     decrypt: {
       type: String,
       required: true,

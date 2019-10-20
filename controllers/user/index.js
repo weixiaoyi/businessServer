@@ -206,6 +206,16 @@ class UserController extends Router {
           msg: "密码错误"
         });
       }
+      const updateLoginTime = User.findOneAndUpdate(
+        {
+          domain,
+          name
+        },
+        { lastLoginTime: Date.now() },
+        { new: true }
+      ).catch(this.handleError);
+      if (this.isError(updateLoginTime) || this.isNull(updateLoginTime))
+        return this.fail(res);
       resultUser = findUser;
     } else {
       const { userAgent, captcha } = user;
@@ -243,16 +253,6 @@ class UserController extends Router {
             msg: "账户名已经存在"
           });
         }
-        const isDecryptExist = await this.checkDecryptIsExist(
-          req.decrypt
-        ).catch(this.handleError);
-        if (this.isError(isDecryptExist)) return this.fail(res);
-        if (isDecryptExist) {
-          return this.fail(res, {
-            msg: "Bad Request",
-            status: 400
-          });
-        }
         resultUser = await createUser().catch(this.handleError);
         if (this.isError(resultUser)) return this.fail(res);
       } else if (mode === "ifNotRegisterThenLogin") {
@@ -269,8 +269,6 @@ class UserController extends Router {
 
   checkDomainUserNameIsExist = async (domain, name) =>
     User.findOne({ domain, name });
-
-  checkDecryptIsExist = async decrypt => User.findOne({ decrypt });
 
   checkNameAndPasswordFormat = (domain, name, password) => {
     const isValid = this.validator.validate(undefined, [
