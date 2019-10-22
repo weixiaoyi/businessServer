@@ -26,6 +26,11 @@ class IdeaCommentController extends Router {
       [this.authority.checkLogin],
       this.deleteComment
     );
+    this.router.put(
+      "/inspectComment",
+      [this.authority.checkAdmin],
+      this.inspectComment
+    );
   };
 
   getComments = async (req, res) => {
@@ -41,7 +46,7 @@ class IdeaCommentController extends Router {
       },
       {
         field: "ideaId",
-        type: "isMongoId"
+        type: this.env.isCustomer(req) ? "isMongoId" : undefined
       },
       {
         field: "online",
@@ -59,7 +64,7 @@ class IdeaCommentController extends Router {
         Model: IdeaComment,
         pagination: { page, pageSize },
         match: {
-          ideaId: this.db.ObjectId(ideaId),
+          ...(ideaId ? { ideaId: this.db.ObjectId(ideaId) } : {}),
           ...(online ? { online } : {})
         },
         sort: {
@@ -163,6 +168,34 @@ class IdeaCommentController extends Router {
         _id: commentId,
         accountId: _id
       },
+      { new: true }
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  inspectComment = async (req, res) => {
+    const { id, online } = req.body;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      },
+      {
+        field: "online",
+        type: "isIn",
+        payload: ["on", "off"]
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await IdeaComment.findByIdAndUpdate(
+      id,
+      { online },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
