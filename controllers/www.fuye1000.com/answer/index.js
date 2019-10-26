@@ -88,7 +88,11 @@ class AnswerController extends Router {
       ...(online ? { online } : {})
     }).catch(this.handleError);
     if (this.isError(dbInfo) || this.isNull(dbInfo))
-      return this.fail(res, { msg: "线上未找到对应的dbName,检查是否上线" });
+      return this.fail(res, {
+        msg: this.env.isCustomer(req)
+          ? "未找到资源"
+          : "线上未找到对应的dbName,检查是否上线"
+      });
 
     const dbInfoLimit = _.get(dbInfo, "member.limit");
     if (dbInfoLimit && page <= dbInfoLimit) {

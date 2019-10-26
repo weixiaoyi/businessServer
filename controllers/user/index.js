@@ -293,7 +293,7 @@ class UserController extends Router {
     ]);
     if (!isValid) return false;
     password = decryptString(password);
-    return !(password.length < 6 || password.length > 20);
+    return !(password.length < 6 || password.length > 25);
   };
 
   loginOut = async (req, res) => {
