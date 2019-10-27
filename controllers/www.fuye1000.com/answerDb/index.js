@@ -1,5 +1,7 @@
 import { Router, Authority, Validator, Env, Db } from "../../../components";
 import { AnswerDb } from "../../../models";
+import { CacheKeys } from "../../../constants";
+import { Cache } from "../../../componentsSingle";
 
 class AnswerDbController extends Router {
   constructor(props) {
@@ -55,17 +57,23 @@ class AnswerDbController extends Router {
       }
     ]);
     if (!isValid) return this.fail(res, { status: 400 });
-    const result = await this.db
-      .handlePage({
-        Model: AnswerDb,
-        pagination: { page, pageSize },
-        match: {
-          ...(online ? { online } : {})
-        },
-        project: this.answerDbView
-      })
-      .catch(this.handleError);
-    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    let result = "";
+    if (this.env.isCustomer(req) && Cache.get(CacheKeys.fuye.answerDb)) {
+      result = Cache.get(CacheKeys.fuye.answerDb);
+    } else {
+      result = await this.db
+        .handlePage({
+          Model: AnswerDb,
+          pagination: { page, pageSize },
+          match: {
+            ...(online ? { online } : {})
+          },
+          project: this.answerDbView
+        })
+        .catch(this.handleError);
+      if (this.isError(result) || this.isNull(result)) return this.fail(res);
+      if (online === "on") Cache.set(CacheKeys.fuye.answerDb, result);
+    }
     return this.success(res, {
       data: result.data,
       pagination: {
@@ -96,6 +104,7 @@ class AnswerDbController extends Router {
       { new: true, upsert: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    Cache.del(CacheKeys.fuye.answerDb);
     return this.success(res, {
       data: result
     });
@@ -115,6 +124,7 @@ class AnswerDbController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    Cache.del(CacheKeys.fuye.answerDb);
     return this.success(res, {
       data: result
     });
@@ -131,6 +141,7 @@ class AnswerDbController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    Cache.del(CacheKeys.fuye.answerDb);
     return this.success(res, {
       data: result
     });
@@ -154,6 +165,7 @@ class AnswerDbController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    Cache.del(CacheKeys.fuye.answerDb);
     return this.success(res, {
       data: result
     });

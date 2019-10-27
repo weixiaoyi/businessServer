@@ -63,8 +63,8 @@ app.use(
     saveUninitialized: true,
     rolling: true,
     cookie: {
-      maxAge: 3 * 24 * 60 * 60 * 1000
-      // secure: true //https环境开启
+      maxAge: 3 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production"
     },
     unset: "destroy"
   })

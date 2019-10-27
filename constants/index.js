@@ -37,7 +37,10 @@ export const Messages = {
 };
 
 export const CacheKeys = {
-  sensitiveWord: "sensitiveWord"
+  sensitiveWord: "sensitiveWord",
+  fuye: {
+    answerDb: "answerDb"
+  }
 };
 
 export const SetReqSession = (req, key, value) => {
