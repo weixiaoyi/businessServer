@@ -36,7 +36,6 @@ app.use(
     credentials: true
   })
 );
-
 app.use(logger("dev"));
 app.use(helmet());
 app.use(express.json());
