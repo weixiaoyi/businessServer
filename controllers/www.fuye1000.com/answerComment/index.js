@@ -1,6 +1,6 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { AnswerComment } from "../../../models";
-import { ModelNames, Messages } from "../../../constants";
+import { ModelNames, SetReq } from "../../../constants";
 
 class AnswerCommentController extends Router {
   constructor(props) {
@@ -105,20 +105,21 @@ class AnswerCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
-    const isSensitiveSafe = await this.validator.checkSensitiveSafe(comment);
-    if (!isSensitiveSafe) {
-      return this.fail(res, {
-        status: 400,
-        msg: Messages.sensitiveWord
-      });
+
+    if (req.blIsNormal) {
+      const isSensitiveSafe = await this.validator.checkSensitiveSafe(comment);
+      if (!isSensitiveSafe) {
+        SetReq(req, "blIsNormal", false);
+      }
     }
+
     const { _id } = req.session.user;
     const newComment = new AnswerComment({
       answerId,
       comment,
       accountId: _id,
       createTime: Date.now(),
-      online: "off" //req.blIsNormal ? "" : "off"
+      online: req.blIsNormal ? "on" : "off"
     });
     const result = await newComment.save().catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);

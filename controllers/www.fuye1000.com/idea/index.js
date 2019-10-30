@@ -1,7 +1,7 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { Idea, IdeaComment, IdeaInterest } from "../../../models";
 import { aggregate, trimHtml } from "../../../utils";
-import { ModelNames } from "../../../constants";
+import { ModelNames, SetReq } from "../../../constants";
 import _ from "lodash";
 
 class IdeaController extends Router {
@@ -208,6 +208,17 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
+
+    if (req.blIsNormal) {
+      const isSensitiveSafe = await this.validator.checkSensitiveSafe(
+        title,
+        content
+      );
+      if (!isSensitiveSafe) {
+        SetReq(req, "blIsNormal", false);
+      }
+    }
+
     const { _id } = req.session.user;
     const newIdea = new Idea({
       accountId: _id,
@@ -236,10 +247,25 @@ class IdeaController extends Router {
       return this.fail(res, {
         status: 400
       });
+
+    const isSensitiveSafe = await this.validator.checkSensitiveSafe(
+      title,
+      content
+    );
+    if (!isSensitiveSafe) {
+      SetReq(req, "blIsNormal", false);
+    }
+
     const { _id } = req.session.user;
     const result = await Idea.findOneAndUpdate(
       { _id: id, accountId: _id },
-      { title, content, denyWhy: "", updateTime: Date.now() },
+      {
+        title,
+        content,
+        denyWhy: "",
+        updateTime: Date.now(),
+        ...(req.blIsNormal === false ? { online: "off" } : {})
+      },
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);

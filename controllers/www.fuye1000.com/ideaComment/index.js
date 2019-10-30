@@ -1,6 +1,6 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { IdeaComment } from "../../../models";
-import { ModelNames } from "../../../constants";
+import { ModelNames, SetReq } from "../../../constants";
 
 class IdeaCommentController extends Router {
   constructor(props) {
@@ -131,6 +131,14 @@ class IdeaCommentController extends Router {
       return this.fail(res, {
         status: 400
       });
+
+    if (req.blIsNormal) {
+      const isSensitiveSafe = await this.validator.checkSensitiveSafe(comment);
+      if (!isSensitiveSafe) {
+        SetReq(req, "blIsNormal", false);
+      }
+    }
+
     const newComment = new IdeaComment({
       ideaId,
       comment,
