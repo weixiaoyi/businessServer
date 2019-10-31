@@ -6,7 +6,8 @@ class AnswerCommentController extends Router {
   constructor(props) {
     super(props);
     this.init();
-    this.commentView = "answerId accountId comment popUser._id popUser.name";
+    this.commentView =
+      "answerId accountId comment createTime popUser._id popUser.name online";
   }
 
   init = () => {
@@ -19,6 +20,11 @@ class AnswerCommentController extends Router {
       "/publishComment",
       [this.authority.checkLogin, this.authority.checkUserBl],
       this.publishComment
+    );
+    this.router.put(
+      "/inspectComment",
+      [this.authority.checkAdmin],
+      this.inspectComment
     );
   };
 
@@ -35,7 +41,7 @@ class AnswerCommentController extends Router {
       },
       {
         field: "answerId",
-        type: "required"
+        type: this.env.isCustomer(req) ? "required" : undefined
       },
       {
         field: "online",
@@ -52,7 +58,7 @@ class AnswerCommentController extends Router {
         Model: AnswerComment,
         pagination: { page, pageSize },
         match: {
-          answerId,
+          ...(answerId ? { answerId } : {}),
           ...(online ? { online } : {})
         },
         project: this.commentView,
@@ -122,6 +128,34 @@ class AnswerCommentController extends Router {
       online: req.blIsNormal ? "on" : "off"
     });
     const result = await newComment.save().catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  inspectComment = async (req, res) => {
+    const { id, online } = req.body;
+    const isValid = this.validator.validate(req.body, [
+      {
+        field: "id",
+        type: "isMongoId"
+      },
+      {
+        field: "online",
+        type: "isIn",
+        payload: ["on", "off"]
+      }
+    ]);
+    if (!isValid)
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await AnswerComment.findByIdAndUpdate(
+      id,
+      { online },
+      { new: true }
+    ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     return this.success(res, {
       data: result

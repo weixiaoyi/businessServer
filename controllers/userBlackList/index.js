@@ -1,6 +1,6 @@
 import { UserBlackList } from "../../models";
 import { Router, Authority, Validator, Db } from "../../components";
-import { ModelNames } from "../../constants";
+import { Domain, ModelNames } from "../../constants";
 
 class UserBlackListController extends Router {
   constructor(props) {
@@ -34,6 +34,11 @@ class UserBlackListController extends Router {
       {
         field: "pageSize",
         type: "isInt"
+      },
+      {
+        field: "domain",
+        type: "isIn",
+        payload: [Domain.fuye.value]
       }
     ]);
     if (!isValid)
@@ -45,6 +50,9 @@ class UserBlackListController extends Router {
       .handlePage({
         Model: UserBlackList,
         pagination: { page, pageSize },
+        match: {
+          domain: Domain.fuye.value
+        },
         lookup: {
           from: ModelNames.user,
           localField: "accountId",
