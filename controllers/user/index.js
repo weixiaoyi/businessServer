@@ -78,7 +78,7 @@ class UserController extends Router {
   };
 
   getUsers = async (req, res) => {
-    const { page, pageSize } = req.query;
+    const { page, pageSize, id, name } = req.query;
     const isValid = this.validator.validate(req.query, [
       {
         field: "page",
@@ -87,6 +87,11 @@ class UserController extends Router {
       {
         field: "pageSize",
         type: "isInt"
+      },
+      {
+        field: "domain",
+        type: "isIn",
+        payload: [Domain.fuye.value]
       }
     ]);
     if (!isValid)
@@ -98,6 +103,11 @@ class UserController extends Router {
       .handlePage({
         Model: User,
         pagination: { page, pageSize },
+        match: {
+          domain: Domain.fuye.value,
+          ...(id ? { _id: this.db.ObjectId(id) } : {}),
+          ...(name ? { name } : {})
+        },
         lookup: {
           from: ModelNames.userBlackList,
           localField: "_id",

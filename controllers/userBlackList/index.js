@@ -50,14 +50,14 @@ class UserBlackListController extends Router {
       .handlePage({
         Model: UserBlackList,
         pagination: { page, pageSize },
-        match: {
-          domain: Domain.fuye.value
-        },
         lookup: {
           from: ModelNames.user,
           localField: "accountId",
           foreignField: "_id",
           as: "popUser"
+        },
+        matchAfterLookup: {
+          "popUser.domain": Domain.fuye.value
         },
         project: {
           "popUser.password": 0

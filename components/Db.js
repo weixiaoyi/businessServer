@@ -29,14 +29,33 @@ class Db extends Response {
       )
     )
       .facet({
-        total: [
-          {
-            $count: "total"
-          }
-        ],
+        total: []
+          .concat(
+            matchAfterLookup
+              ? (lookup
+                  ? _.isArray(lookup)
+                    ? lookup.map(item => ({ $lookup: item }))
+                    : [
+                        {
+                          $lookup: lookup
+                        }
+                      ]
+                  : []
+                ).concat([
+                  {
+                    $match: matchAfterLookup
+                  }
+                ])
+              : []
+          )
+          .concat([
+            {
+              $count: "total"
+            }
+          ]),
         data: []
           .concat(
-            sort
+            sort //分页的排序必须最先执行
               ? [
                   {
                     $sort: sort
@@ -75,15 +94,6 @@ class Db extends Response {
               : []
           )
           .concat(
-            group
-              ? [
-                  {
-                    $group: group
-                  }
-                ]
-              : []
-          )
-          .concat(
             project
               ? [
                   {
@@ -105,7 +115,7 @@ class Db extends Response {
     };
   };
 
-  // 普通聚合
+  // 普通聚合，比较适合查询单一数据，非分页数据
   handleAggregate = async ({ Model, match, project, lookup, map, sort }) => {
     if (!Model) return console.error("handleAggregate参数错误");
     const res = await Model.aggregate(
@@ -142,7 +152,7 @@ class Db extends Response {
             : []
         )
         .concat(
-          sort
+          sort // 普通连表查询最后执行排序
             ? [
                 {
                   $sort: sort
