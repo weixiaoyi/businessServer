@@ -3,6 +3,20 @@ import moment from "moment";
 import _ from "lodash";
 import { decryptString } from "../../utils";
 
+const checkLatest = (function() {
+  const latest = [];
+  return (decrypt, recordLength = 3) => {
+    if (latest.find(item => item === decrypt)) {
+      return false;
+    }
+    latest.push(decrypt);
+    if (latest.length > recordLength) {
+      latest.shift();
+    }
+    return true;
+  };
+})();
+
 export const checkDecrypt = authorization => {
   if (!authorization) {
     throw "1";
@@ -25,6 +39,9 @@ export const checkDecrypt = authorization => {
   }
   if (moment(Date.now()).diff(moment(time), "seconds") >= 11) {
     throw "6";
+  }
+  if (!checkLatest(decryptedData)) {
+    throw "7";
   }
   return mnemonic;
 };
