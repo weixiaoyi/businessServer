@@ -240,7 +240,7 @@ class UserController extends Router {
         !req.session.captcha ||
         captcha.toUpperCase() !== req.session.captcha.toUpperCase()
       ) {
-        console.log(captcha, req.session.captcha);
+        console.log(captcha, req.session.captcha, req.session);
         return this.fail(res, {
           msg: "验证码错误，请填写正确验证码",
           status: 400

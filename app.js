@@ -62,10 +62,9 @@ app.use(
     saveUninitialized: true,
     rolling: true,
     cookie: {
-      maxAge: 3 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production"
-    },
-    unset: "destroy"
+      maxAge: 3 * 24 * 60 * 60 * 1000
+      //secure: process.env.NODE_ENV === "production"
+    }
   })
 );
 
