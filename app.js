@@ -63,7 +63,6 @@ app.use(
     rolling: true,
     cookie: {
       maxAge: 3 * 24 * 60 * 60 * 1000
-      //secure: process.env.NODE_ENV === "production"
     }
   })
 );
