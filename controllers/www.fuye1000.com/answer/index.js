@@ -210,6 +210,7 @@ class AnswerController extends Router {
       prevUpVoteNum,
       questionId,
       title,
+      online: "upload",
       createTime: Date.now()
     });
     const result = await newAnswer.save().catch(this.handleError);

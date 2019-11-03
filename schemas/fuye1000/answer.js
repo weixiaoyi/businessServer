@@ -24,7 +24,7 @@ const answerSchema = new mongoose.Schema(
     online: {
       type: String,
       required: true,
-      enum: ["on", "off"]
+      enum: ["on", "off", "upload"]
     },
     dbName: {
       type: String,
