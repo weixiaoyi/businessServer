@@ -111,12 +111,17 @@ class AnswerController extends Router {
     const result = await this.db
       .handlePage({
         Model: Answer,
+        sort: {
+          createTime: this.env.isCustomer(req) ? 1 : -1
+        },
         pagination: { page, pageSize },
         match: {
           dbName,
           ...(online ? { online } : {})
         },
-        project: this.answerView
+        project: `${this.answerView} ${
+          this.env.isCustomer(req) ? "" : "prevUpVoteNum"
+        } ${this.env.isCustomer(req) ? "" : "updateTime"}`
       })
       .catch(this.handleError);
 

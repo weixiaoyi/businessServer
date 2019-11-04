@@ -103,6 +103,7 @@ class UserController extends Router {
       .handlePage({
         Model: User,
         pagination: { page, pageSize },
+        sort: { createTime: -1 },
         match: {
           domain: Domain.fuye.value,
           ...(id ? { _id: this.db.ObjectId(id) } : {}),
