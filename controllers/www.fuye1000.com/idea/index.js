@@ -90,7 +90,9 @@ class IdeaController extends Router {
             : {})
         },
         sort: {
-          createTime: -1
+          ...(this.env.isCustomer(req)
+            ? { createTime: -1 }
+            : { updateTime: -1, createTime: -1 })
         },
         lookup: [
           {
@@ -131,7 +133,8 @@ class IdeaController extends Router {
               }
             }
           },
-          content: 1
+          content: 1,
+          ...(this.env.isCustomer(req) ? {} : { updateTime: 1 })
         }),
         map: item => {
           return {

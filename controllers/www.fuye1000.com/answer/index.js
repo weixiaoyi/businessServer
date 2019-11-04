@@ -43,6 +43,11 @@ class AnswerController extends Router {
       this.updateLineAnswer
     );
     this.router.post("/voteAnswer", this.voteAnswer);
+    this.router.put(
+      "/recommendAnswer",
+      [this.authority.checkAdmin],
+      this.recommendAnswer
+    );
     this.router.post(
       "/checkLineAnswer",
       [this.authority.checkAdmin],
@@ -112,7 +117,14 @@ class AnswerController extends Router {
       .handlePage({
         Model: Answer,
         sort: {
-          createTime: this.env.isCustomer(req) ? 1 : -1
+          ...(this.env.isCustomer(req)
+            ? {
+                index: -1,
+                createTime: 1
+              }
+            : {
+                createTime: -1
+              })
         },
         pagination: { page, pageSize },
         match: {
@@ -120,8 +132,8 @@ class AnswerController extends Router {
           ...(online ? { online } : {})
         },
         project: `${this.answerView} ${
-          this.env.isCustomer(req) ? "" : "prevUpVoteNum"
-        } ${this.env.isCustomer(req) ? "" : "updateTime"}`
+          this.env.isCustomer(req) ? "" : "prevUpVoteNum updateTime index"
+        }`
       })
       .catch(this.handleError);
 
@@ -255,6 +267,25 @@ class AnswerController extends Router {
       { answerId },
       {
         $inc: { currentUpVoteNum: 1 }
+      },
+      { new: true }
+    ).catch(this.handleError);
+    if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    return this.success(res, {
+      data: result
+    });
+  };
+
+  recommendAnswer = async (req, res) => {
+    const { answerId, index } = req.body;
+    if (!answerId || !_.isNumber(index))
+      return this.fail(res, {
+        status: 400
+      });
+    const result = await Answer.findOneAndUpdate(
+      { answerId },
+      {
+        index
       },
       { new: true }
     ).catch(this.handleError);
