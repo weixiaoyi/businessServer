@@ -88,7 +88,8 @@ class AnswerDbController extends Router {
     const { name, desc, title, intro, member } = req.body;
     if (!name || !desc || !title || !intro || !member)
       return this.fail(res, {
-        status: 400
+        status: 400,
+        msg: "参数不完整"
       });
     const result = await AnswerDb.findOneAndUpdate(
       { name },
@@ -101,7 +102,7 @@ class AnswerDbController extends Router {
         createTime: Date.now(),
         online: "on"
       },
-      { new: true, upsert: true }
+      { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     Cache.del(CacheKeys.fuye.answerDb);
@@ -162,7 +163,7 @@ class AnswerDbController extends Router {
         intro,
         member
       },
-      { new: true }
+      { new: true, upsert: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
     Cache.del(CacheKeys.fuye.answerDb);
