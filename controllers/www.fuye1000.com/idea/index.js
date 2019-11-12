@@ -1,6 +1,6 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { Idea, IdeaComment, IdeaInterest } from "../../../models";
-import { aggregate, trimHtml } from "../../../utils";
+import { aggregate, trimHtml, xss } from "../../../utils";
 import { ModelNames, SetReq } from "../../../constants";
 import _ from "lodash";
 
@@ -225,8 +225,8 @@ class IdeaController extends Router {
     const { _id } = req.session.user;
     const newIdea = new Idea({
       accountId: _id,
-      title,
-      content,
+      title: xss(title),
+      content: xss(content),
       createTime: Date.now(),
       online: req.blIsNormal ? "on" : "off"
     });
@@ -263,8 +263,8 @@ class IdeaController extends Router {
     const result = await Idea.findOneAndUpdate(
       { _id: id, accountId: _id },
       {
-        title,
-        content,
+        title: xss(title),
+        content: xss(content),
         denyWhy: "",
         updateTime: Date.now(),
         ...(req.blIsNormal === false ? { online: "off" } : {})

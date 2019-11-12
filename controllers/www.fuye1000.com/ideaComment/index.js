@@ -1,6 +1,7 @@
 import { Router, Authority, Db, Validator, Env } from "../../../components";
 import { IdeaComment } from "../../../models";
 import { ModelNames, SetReq } from "../../../constants";
+import { xss } from "../../../utils";
 
 class IdeaCommentController extends Router {
   constructor(props) {
@@ -141,7 +142,7 @@ class IdeaCommentController extends Router {
 
     const newComment = new IdeaComment({
       ideaId,
-      comment,
+      comment: xss(comment),
       accountId: _id,
       createTime: Date.now(),
       online: req.blIsNormal ? "on" : "off",

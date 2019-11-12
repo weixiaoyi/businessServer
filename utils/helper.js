@@ -1,5 +1,7 @@
 import _trimHtml from "trim-html";
 
+export { default as xss } from "xss";
+
 export const splitQueryString = strings => {
   if (!strings) return {};
   const resultsObj = {};
