@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { User, Member } from "../../models";
 import { Router, Authority, Validator, Db } from "../../components";
-import { splitQueryString, decryptString, RegExp } from "../../utils";
+import { splitQueryString, decryptString, RegExp, xss } from "../../utils";
 import _ from "lodash";
 import { OAUTH, Domain, ModelNames, SetReqSession } from "../../constants";
 
@@ -249,8 +249,8 @@ class UserController extends Router {
       const createUser = async () => {
         const timeNow = Date.now();
         const newUser = new User({
-          name,
-          password,
+          name: xss(name),
+          password: xss(password),
           domain,
           userAgent,
           decrypt: req.decrypt,
