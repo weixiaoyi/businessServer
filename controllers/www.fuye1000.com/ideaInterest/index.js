@@ -1,4 +1,11 @@
-import { Router, Authority, Db, Validator, Env } from "../../../components";
+import {
+  Router,
+  Authority,
+  Db,
+  Validator,
+  Env,
+  Notice
+} from "../../../components";
 import { IdeaInterest } from "../../../models";
 import { ModelNames } from "../../../constants";
 import { aggregate, trimHtml } from "../../../utils";
@@ -18,6 +25,7 @@ class IdeaInterestController extends Router {
     this.db = new Db();
     this.validator = new Validator();
     this.env = new Env();
+    this.notice = new Notice();
     this.router.get(
       "/getInterest",
       [this.authority.checkLogin],
@@ -245,6 +253,10 @@ class IdeaInterestController extends Router {
       );
     }
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: action === "add" ? "关注" : "取消关注",
+      text: result
+    });
     return this.success(res, {
       data: result
     });

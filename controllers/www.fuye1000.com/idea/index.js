@@ -1,4 +1,11 @@
-import { Router, Authority, Db, Validator, Env } from "../../../components";
+import {
+  Router,
+  Authority,
+  Db,
+  Validator,
+  Env,
+  Notice
+} from "../../../components";
 import { Idea, IdeaComment, IdeaInterest } from "../../../models";
 import { aggregate, trimHtml, xss } from "../../../utils";
 import { ModelNames, SetReq } from "../../../constants";
@@ -18,6 +25,7 @@ class IdeaController extends Router {
     this.db = new Db();
     this.validator = new Validator();
     this.env = new Env();
+    this.notice = new Notice();
     this.router.get(
       "/getMyIdeas",
       [this.authority.checkLogin],
@@ -232,6 +240,10 @@ class IdeaController extends Router {
     });
     const result = await newIdea.save().catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: "发布副业",
+      text: result
+    });
     return this.success(res, {
       data: result
     });
@@ -272,6 +284,10 @@ class IdeaController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: "编辑副业",
+      text: result
+    });
     return this.success(res, {
       data: result
     });
@@ -312,6 +328,10 @@ class IdeaController extends Router {
       )
     ]).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: "删除副业",
+      text: result
+    });
     return this.success(res, {
       data: result
     });

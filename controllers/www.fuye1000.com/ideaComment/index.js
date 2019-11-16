@@ -1,4 +1,11 @@
-import { Router, Authority, Db, Validator, Env } from "../../../components";
+import {
+  Router,
+  Authority,
+  Db,
+  Validator,
+  Env,
+  Notice
+} from "../../../components";
 import { IdeaComment } from "../../../models";
 import { ModelNames, SetReq } from "../../../constants";
 import { xss } from "../../../utils";
@@ -16,6 +23,7 @@ class IdeaCommentController extends Router {
     this.db = new Db();
     this.validator = new Validator();
     this.env = new Env();
+    this.notice = new Notice();
     this.router.get("/getComments", this.getComments);
     this.router.post(
       "/publishComment",
@@ -154,6 +162,10 @@ class IdeaCommentController extends Router {
     });
     const result = await newComment.save().catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: "副业评论",
+      text: result
+    });
     return this.success(res, {
       data: result
     });
@@ -180,6 +192,10 @@ class IdeaCommentController extends Router {
       { new: true }
     ).catch(this.handleError);
     if (this.isError(result) || this.isNull(result)) return this.fail(res);
+    this.notice.send({
+      title: "删除副业评论",
+      text: result
+    });
     return this.success(res, {
       data: result
     });
