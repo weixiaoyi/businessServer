@@ -15,7 +15,7 @@ class CaptchaController extends Router {
   getCaptcha = (req, res) => {
     const captcha = svgCaptcha.create({
       fontSize: 70,
-      height: 30,
+      height: 45,
       noise: 0
     });
 
