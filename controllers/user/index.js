@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { User, Member } from "../../models";
-import { Router, Authority, Validator, Db } from "../../components";
+import { Router, Authority, Validator, Db, Notice } from "../../components";
 import { splitQueryString, decryptString, RegExp, xss } from "../../utils";
 import _ from "lodash";
 import { OAUTH, Domain, ModelNames, SetReqSession } from "../../constants";
@@ -15,6 +15,7 @@ class UserController extends Router {
     this.authority = new Authority();
     this.validator = new Validator();
     this.db = new Db();
+    this.notice = new Notice();
     this.router.post("/login", this.login);
     this.router.post("/register", this.register);
     this.router.post("/loginThird", this.loginThird);
@@ -266,6 +267,10 @@ class UserController extends Router {
         }
         resultUser = await createUser().catch(this.handleError);
         if (this.isError(resultUser)) return this.fail(res);
+        this.notice.send({
+          title: "账户创建",
+          text: resultUser
+        });
       } else if (mode === "ifNotRegisterThenLogin") {
         // resultUser = findUser;
       }
